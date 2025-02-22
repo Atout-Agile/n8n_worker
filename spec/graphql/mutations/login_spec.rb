@@ -13,7 +13,7 @@ RSpec.describe Mutations::Login, type: :request do
           user {
             id
             email
-            name
+            username
           }
           errors
         }
@@ -33,7 +33,7 @@ RSpec.describe Mutations::Login, type: :request do
         
         expect(data['token']).to be_present
         expect(data['user']['email']).to eq(user.email)
-        expect(data['user']['name']).to eq(user.name)
+        expect(data['user']['username']).to eq(user.name)
         expect(data['errors']).to be_empty
       end
     end

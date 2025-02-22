@@ -491,3 +491,79 @@ L'objectif de cette version est de mettre en place une documentation automatique
   - Ajout de la licence GPL v3
   Fichiers modifiés :
   - README.md
+
+## [2024-02-22--0004]
+
+### Configuration de la gestion de projet
+
+- Création du projet GitHub "n8n_worker" pour gérer les user stories
+  - Utilisation des projets GitHub pour une meilleure visibilité
+  - Organisation des tâches en tableau kanban
+  - Priorisation des user stories
+
+- Import des user stories depuis le todo.md
+  - Création des items dans le projet
+  - Organisation logique des dépendances
+  - Numérotation des étapes d'implémentation
+
+- Documentation de la gestion de projet
+  - Mise à jour du todo.md avec les références au projet
+  - Ajout des tags [✓ Created in project n8n_worker]
+  - Réorganisation des user stories par ordre d'implémentation
+
+### Objectifs de cette version
+
+L'objectif principal est d'améliorer la gestion du projet en :
+- Centralisant les user stories dans un outil dédié
+- Facilitant le suivi de l'avancement
+- Permettant une meilleure priorisation
+- Documentant clairement les dépendances entre tâches
+
+### Notes
+
+La gestion de projet est maintenant configurée pour :
+- Suivre l'avancement des développements
+
+## [2024-02-22--0005]
+
+### Ajout de la query User
+
+- Création de la query GraphQL pour récupérer les informations d'un utilisateur
+  - Recherche possible par ID ou email
+  - Retourne les champs : id, email, username et role
+  - Le champ `name` de la base de données est exposé comme `username` dans l'API
+
+```graphql
+# Exemple de query par ID
+query {
+  user(id: "1") {
+    id
+    email
+    username
+    role {
+      name
+    }
+  }
+}
+
+# Exemple de query par email
+query {
+  user(email: "test@example.com") {
+    id
+    email
+    username
+    role {
+      name
+    }
+  }
+}
+```
+
+- Création des fichiers :
+  - `app/graphql/queries/base_query.rb` : Classe de base pour les queries
+  - `app/graphql/queries/user.rb` : Implémentation de la query user
+  - `spec/graphql/queries/user_query_spec.rb` : Tests de la query
+
+- Modification des fichiers :
+  - `app/graphql/types/user_type.rb` : Ajout du champ username
+  - `app/graphql/types/query_type.rb` : Ajout de la query user
