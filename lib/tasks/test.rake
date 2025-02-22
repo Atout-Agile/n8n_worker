@@ -7,19 +7,21 @@ namespace :test do
     ENV['RAILS_ENV'] = 'test'
     Rails.env = 'test'
 
-    require 'simplecov'
-
-    # Configurer SimpleCov
-    SimpleCov.start 'rails' do
-      add_filter '/spec/'
-      add_filter '/config/'
-      
-      add_group 'Controllers', 'app/controllers'
-      add_group 'Models', 'app/models'
-      add_group 'GraphQL', 'app/graphql'
-      add_group 'Services', 'app/services'
-      add_group 'Lib', 'app/lib'
-    end
+    # NOTE: Cette configuration de SimpleCov est redondante et cause des problèmes
+    # car SimpleCov est déjà configuré dans spec/rails_helper.rb
+    # require 'simplecov'
+    #
+    # # Configurer SimpleCov
+    # SimpleCov.start 'rails' do
+    #   add_filter '/spec/'
+    #   add_filter '/config/'
+    #   
+    #   add_group 'Controllers', 'app/controllers'
+    #   add_group 'Models', 'app/models'
+    #   add_group 'GraphQL', 'app/graphql'
+    #   add_group 'Services', 'app/services'
+    #   add_group 'Lib', 'app/lib'
+    # end
 
     # Préparer la base de test
     Rake::Task['db:environment:set'].invoke('RAILS_ENV=test')

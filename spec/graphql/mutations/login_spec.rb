@@ -1,6 +1,6 @@
 # frozen_string_literal: true
-
 require 'rails_helper'
+
 
 RSpec.describe Mutations::Login, type: :request do
   let(:role) { create(:role) }
