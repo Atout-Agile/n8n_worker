@@ -1,2 +1,11 @@
 <h1>Api::V1::Tokens#create</h1>
 <p>Find me in app/views/api/v1/tokens/create.html.erb</p>
+
+<div class="token-creation">
+  <h2>Token créé avec succès</h2>
+  
+  <div class="token-details">
+    <p><strong>Nom :</strong> <%= @token.name %></p>
+    <p><strong>Expire le :</strong> <%= format_token_expiration(@token.expires_at) %></p>
+  </div>
+</div>

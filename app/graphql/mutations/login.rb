@@ -15,12 +15,7 @@ module Mutations
       user = User.find_by(email: email)
 
       if user&.authenticate(password)
-        token = JWT::JsonWebToken.encode(
-          user_id: user.id,
-          email: user.email,
-          role: user.role.name
-        )
-
+        token = JsonWebToken.encode(user_id: user.id, email: user.email)
         {
           token: token,
           user: user,
@@ -30,7 +25,7 @@ module Mutations
         {
           token: nil,
           user: nil,
-          errors: ["Email ou mot de passe invalide"]
+          errors: ['Email ou mot de passe invalide']
         }
       end
     end

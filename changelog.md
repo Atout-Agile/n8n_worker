@@ -268,9 +268,156 @@ git push -u origin main
 
 ### Configuration du framework de test
 
-- À venir :
-  - Configuration complète de RSpec
-  - Mise en place des factories avec FactoryBot
-  - Tests des modèles
-  - Tests des mutations GraphQL
-  - Tests d'intégration
+- Installation des gems de test
+  - factory_bot_rails : création de données de test
+  - faker : génération de données aléatoires réalistes
+  - shoulda-matchers : matchers RSpec additionnels
+  - rspec-graphql_matchers : matchers spécifiques GraphQL
+  - simplecov : couverture de code
+  - database_cleaner : nettoyage de la BD entre les tests
+  Fichiers modifiés :
+  - Gemfile
+
+- Configuration de FactoryBot pour utiliser les méthodes de factory directement dans les tests
+  Fichiers modifiés :
+  - spec/support/factory_bot.rb
+
+- Configuration de Shoulda Matchers pour les tests de modèles
+  Fichiers modifiés :
+  - spec/support/shoulda_matchers.rb
+
+- Configuration de SimpleCov pour analyser la couverture de code
+  - Exclusion des fichiers de config et des tests
+  - Groupement des fichiers par type pour le rapport
+  - Configuration spécifique pour les fichiers GraphQL
+  Fichiers modifiés :
+  - spec/support/simplecov.rb
+
+- Configuration de DatabaseCleaner pour nettoyer la base de données entre les tests
+  - Stratégie de transaction par défaut (plus rapide)
+  - Basculement automatique vers la troncature pour les tests JS
+  - Nettoyage complet de la base avant la suite de tests
+  - Nettoyage après chaque test pour isoler les données
+  Fichiers modifiés :
+  - spec/support/database_cleaner.rb
+
+- Configuration des matchers GraphQL pour tester l'API
+  - Support des tests de types GraphQL
+  - Validation des champs et arguments
+  - Vérification des mutations et queries
+  Fichiers modifiés :
+  - spec/support/graphql_matchers.rb
+
+- Création des factories pour les tests
+  - Factory Role avec des rôles prédéfinis
+  - Factory User avec génération de données aléatoires via Faker
+  - Factory ApiToken pour les tests d'authentification
+  Fichiers modifiés :
+  - spec/factories/role.rb
+  - spec/factories/user.rb
+  - spec/factories/api_token.rb
+
+- Création des tests de modèles
+  - Tests des validations et associations
+  - Tests des méthodes personnalisées
+  - Tests des scopes et callbacks
+  Fichiers modifiés :
+  - spec/models/role_spec.rb
+  - spec/models/user_spec.rb
+  - spec/models/api_token_spec.rb
+
+- Création des tests GraphQL
+  - Tests de la mutation Login
+  - Tests d'authentification
+  - Tests des erreurs de validation
+  Fichiers modifiés :
+  - spec/graphql/mutations/login_spec.rb
+
+- Création des tests du service JWT
+  - Tests d'encodage des tokens
+  - Tests de décodage des tokens
+  - Tests de gestion des erreurs
+  Fichiers modifiés :
+  - spec/lib/jwt/json_web_token_spec.rb
+
+- Remplacement du script bash par une tâche Rake
+  - Création d'une tâche test:coverage
+  - Configuration de SimpleCov intégrée
+  - Gestion de la base de test via Rake
+  - Ouverture automatique du rapport de couverture
+  Fichiers modifiés :
+  - lib/tasks/test.rake
+
+### Création des types GraphQL pour l'authentification
+
+- Type User avec champs de base et relation Role
+- Type Role avec champs de base
+- Support des dates au format ISO8601
+Fichiers modifiés :
+- app/graphql/types/user_type.rb
+- app/graphql/types/role_type.rb
+
+### Amélioration du service JWT
+
+- Support de la configuration via variables d'environnement
+- Gestion flexible de l'expiration (format '24h')
+- Fallback sur secret_key_base si JWT_SECRET_KEY non défini
+- Meilleure gestion des erreurs
+Fichiers modifiés :
+- app/lib/jwt/json_web_token.rb
+
+### Implémentation de l'authentification
+
+- Service JWT pour l'authentification avec gestion des tokens
+  - Encodage/décodage des tokens avec expiration configurable
+  - Gestion des erreurs spécifiques JWT
+- Mutation GraphQL pour le login
+  - Retourne token et informations utilisateur
+  - Gestion des erreurs d'authentification
+- Modèle ApiToken avec validation et scope `active`
+  - Validation d'unicité du nom
+  - Scope pour filtrer les tokens non expirés
+- Helper pour le formatage des dates d'expiration des tokens
+  - Format français : DD/MM/YYYY HH:MM
+- Vue pour afficher les détails d'un token après création
+  - Affichage du nom et de la date d'expiration
+
+### Améliorations et corrections
+
+- Amélioration de la gestion des erreurs JWT
+  - Distinction entre token expiré et token invalide
+- Optimisation des factories pour éviter les doublons
+  - Utilisation de sequences pour les noms uniques
+- Correction des problèmes de validation d'unicité des tokens
+- Correction des tests de validation d'email case-insensitive
+
+### Documentation
+
+- Ajout d'un fichier todo.md avec les user stories pour les fonctionnalités manquantes
+  - Queries GraphQL à implémenter
+  - Mutations GraphQL à implémenter
+  - Tests d'intégration à créer
+  - Helpers et vues à tester
+
+### Configuration des tests système
+
+- Installation de Capybara et Cuprite pour les tests d'interface
+  - Capybara pour l'abstraction des tests système
+  - Cuprite comme driver utilisant Chrome DevTools Protocol
+  Fichiers modifiés :
+  - Gemfile
+
+- Configuration de Capybara avec Cuprite
+  - Configuration des timeouts et taille de fenêtre
+  - Support du debugging avec pause et inspection
+  - Helpers pour le debugging
+  Fichiers modifiés :
+  - spec/support/capybara.rb
+
+- Ajout du support des screenshots automatiques
+  - Capture d'écran en cas d'échec des tests
+  - Stockage dans tmp/screenshots
+  - Format de nom incluant timestamp
+  Fichiers modifiés :
+  - spec/support/system_test_helpers.rb
+  - spec/rails_helper.rb

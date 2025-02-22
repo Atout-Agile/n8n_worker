@@ -67,3 +67,14 @@ gem "dotenv-rails", "~> 3.1"
 gem "jwt", "~> 2.10"
 
 gem "bcrypt", "~> 3.1"
+
+gem "factory_bot_rails", "~> 6.4", :group => :test
+gem "faker", "~> 3.5", :group => :test
+gem "shoulda-matchers", "~> 6.4", :group => :test
+gem "rspec-graphql_matchers", "~> 2.0.pre.rc.0", :group => :test
+gem "simplecov", "~> 0.22.0", :group => :test
+gem "database_cleaner", "~> 2.1", :group => :test
+
+gem "capybara", "~> 3.40", :group => :test
+
+gem "cuprite", "~> 0.15.1", :group => :test

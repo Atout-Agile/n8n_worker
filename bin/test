@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Sauvegarder l'environnement actuel
+PREVIOUS_RAILS_ENV=$RAILS_ENV
+
+# Définir l'environnement pour les tests
+export RAILS_ENV=test
+
+# Nettoyer la couverture précédente
+rm -rf coverage
+
+# Préparer et lancer les tests
+bundle exec rails db:drop db:create db:schema:load
+bundle exec rspec
+TEST_EXIT_CODE=$?
+
+# Ouvrir le rapport de couverture dans le navigateur par défaut (optionnel)
+if [ $TEST_EXIT_CODE -eq 0 ] && [ "$(uname)" == "Darwin" ]; then
+  open coverage/index.html
+elif [ $TEST_EXIT_CODE -eq 0 ] && [ "$(uname)" == "Linux" ]; then
+  xdg-open coverage/index.html
+fi
+
+# Restaurer l'environnement
+export RAILS_ENV=$PREVIOUS_RAILS_ENV
+
+exit $TEST_EXIT_CODE 

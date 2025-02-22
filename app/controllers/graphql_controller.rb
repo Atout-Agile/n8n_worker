@@ -11,14 +11,11 @@ class GraphqlController < ApplicationController
     query = params[:query]
     operation_name = params[:operationName]
     context = {
-      # Ajoute le payload JWT au contexte si authentifié
-      current_user: authenticate_request,
-      # Ajoute d'autres éléments de contexte si nécessaire
+      # Query context goes here, for example:
+      # current_user: current_user,
     }
     result = N8nWorkerSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
-  rescue JWT::VerificationError, JWT::ExpiredSignature => e
-    render json: { errors: [{ message: e.message }] }, status: :unauthorized
   rescue StandardError => e
     raise e unless Rails.env.development?
     handle_error_in_development(e)
@@ -26,34 +23,23 @@ class GraphqlController < ApplicationController
 
   private
 
-  def authenticate_request
-    token = extract_token_from_header
-    raise JWT::VerificationError, "Token d'authentification manquant" if token.nil?
-
-    JWT::JsonWebToken.decode(token)
-  end
-
-  def extract_token_from_header
-    auth_header = request.headers['Authorization']
-    return nil unless auth_header
-    
-    # Format attendu: "Bearer <token>"
-    auth_header.split(' ')[1]
-  end
-
   # Handle variables in form data, JSON body, or a blank value
   def prepare_variables(variables_param)
     case variables_param
     when String
-      variables_param.present? ? JSON.parse(variables_param) || {} : {}
+      if variables_param.present?
+        JSON.parse(variables_param) || {}
+      else
+        {}
+      end
     when Hash
       variables_param
     when ActionController::Parameters
-      variables_param.to_unsafe_hash
+      variables_param.to_unsafe_hash # GraphQL-Ruby will validate name and type of incoming variables.
     when nil
       {}
     else
-      raise ArgumentError, "Unexpected parameter: #{variables_param.class}"
+      raise ArgumentError, "Unexpected parameter: #{variables_param}"
     end
   end
 

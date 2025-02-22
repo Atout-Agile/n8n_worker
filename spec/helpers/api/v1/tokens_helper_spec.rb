@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 # Specs in this file have access to a helper object that includes
@@ -11,5 +13,14 @@ require 'rails_helper'
 #   end
 # end
 RSpec.describe Api::V1::TokensHelper, type: :helper do
-  pending "add some examples to (or delete) #{__FILE__}"
+  describe '#format_token_expiration' do
+    it 'formats expiration date' do
+      date = Time.zone.parse('2024-02-22 14:30:00')
+      expect(helper.format_token_expiration(date)).to eq('22/02/2024 14:30')
+    end
+
+    it 'handles nil date' do
+      expect(helper.format_token_expiration(nil)).to eq('-')
+    end
+  end
 end
