@@ -78,3 +78,9 @@ gem "database_cleaner", "~> 2.1", :group => :test
 gem "capybara", "~> 3.40", :group => :test
 
 gem "cuprite", "~> 0.15.1", :group => :test
+
+gem "yard", "~> 0.9.37"
+
+gem "redcarpet", "~> 3.6"
+
+gem "graphql-docs", "~> 5.2"

@@ -421,3 +421,73 @@ Fichiers modifiés :
   Fichiers modifiés :
   - spec/support/system_test_helpers.rb
   - spec/rails_helper.rb
+
+## [2024-02-22--0003]
+
+### Objectif : Documentation
+
+L'objectif de cette version est de mettre en place une documentation automatique et maintenable qui :
+- Se synchronise automatiquement avec le code
+- Couvre à la fois les modèles Ruby et l'API GraphQL
+- Fournit des exemples d'utilisation à jour
+
+### Configuration de la documentation
+
+- Installation de YARD pour la documentation Ruby
+  - Support de Markdown dans les commentaires
+  - Génération de documentation HTML
+  - Configuration spécifique pour GraphQL
+  Fichiers modifiés :
+  - Gemfile
+  - .yardopts avec les options suivantes :
+    * --markup markdown : Utilise la syntaxe Markdown pour les commentaires
+    * --markup-provider redcarpet : Utilise Redcarpet comme parser Markdown
+    * --protected : Inclut les méthodes protégées dans la documentation
+    * --private : Inclut les méthodes privées dans la documentation
+    * --embed-mixins : Inclut la documentation des mixins dans les classes
+    * --output-dir documentation/yard : Génère la documentation dans ce dossier
+
+- Amélioration du serveur de documentation
+  - Serveur YARD en processus séparé pour la doc Ruby
+  - Serveur WEBrick personnalisé pour la doc GraphQL
+  - Support complet des liens et assets statiques
+  - Navigation fonctionnelle dans la documentation GraphQL
+  - URLs accessibles depuis WSL et Windows
+  - Gestion propre de l'arrêt des serveurs
+  Fichiers modifiés :
+  - lib/tasks/documentation.rake
+
+- Installation de GraphQL::Docs pour l'API
+  - Documentation automatique du schéma
+  - Documentation des types et mutations
+  - Exemples de requêtes GraphQL
+  Fichiers modifiés :
+  - Gemfile
+  - config/initializers/graphql_docs.rb
+
+- Configuration de la génération de documentation
+  - Tâche Rake pour générer la documentation
+  - Organisation par type d'objet (ApiToken, User, Role)
+  - Mise à jour automatique des exemples
+  Fichiers modifiés :
+  - lib/tasks/documentation.rake
+
+- Structure de la documentation
+  - Création du répertoire /documentation
+  - Documentation des modèles
+  - Documentation de l'API GraphQL
+  - Exemples d'utilisation
+  Nouveaux fichiers :
+  - documentation/api_token.md
+  - documentation/user.md
+  - documentation/role.md
+  - documentation/index.md
+
+- Mise à jour du README.md
+  - Description du projet
+  - Instructions d'installation et de configuration
+  - Guide d'utilisation de la documentation
+  - Exemples d'utilisation de l'API GraphQL
+  - Ajout de la licence GPL v3
+  Fichiers modifiés :
+  - README.md
