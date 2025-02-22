@@ -1,6 +1,6 @@
 # Changelog
 
-## [2024-02-22--0001]
+## [2025-02-22--0001]
 
 ### Création du projet
 
@@ -264,7 +264,7 @@ git remote add origin git@github.com:votre-username/n8n_worker.git
 git push -u origin main
 ```
 
-## [2024-02-22--0002]
+## [2025-02-22--0002]
 
 ### Configuration du framework de test
 
@@ -422,7 +422,7 @@ Fichiers modifiés :
   - spec/support/system_test_helpers.rb
   - spec/rails_helper.rb
 
-## [2024-02-22--0003]
+## [2025-02-22--0003]
 
 ### Objectif : Documentation
 
@@ -492,7 +492,7 @@ L'objectif de cette version est de mettre en place une documentation automatique
   Fichiers modifiés :
   - README.md
 
-## [2024-02-22--0004]
+## [2025-02-22--0004]
 
 ### Configuration de la gestion de projet
 
@@ -524,9 +524,9 @@ L'objectif principal est d'améliorer la gestion du projet en :
 La gestion de projet est maintenant configurée pour :
 - Suivre l'avancement des développements
 
-## [2024-02-22--0005]
+## [2025-02-22--0005]
 
-### Ajout de la query User
+### Ajout de la query User (issue [#16](https://github.com/votre-username/n8n_worker/issues/16) )
 
 - Création de la query GraphQL pour récupérer les informations d'un utilisateur
   - Recherche possible par ID ou email
