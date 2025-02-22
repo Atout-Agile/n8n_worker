@@ -567,3 +567,22 @@ query {
 - Modification des fichiers :
   - `app/graphql/types/user_type.rb` : Ajout du champ username
   - `app/graphql/types/query_type.rb` : Ajout de la query user
+
+```
+
+## [2025-02-23--0002]
+
+### Objectif : Test système du processus de login
+
+User story à implémenter :
+
+Sachant que la mutation Login est déjà implémentée
+Afin de garantir son bon fonctionnement de bout en bout
+En tant que Quality Assurance
+Je veux créer un test système qui vérifie :
+- Le formulaire de login avec email/password
+- L'affichage des erreurs de validation
+- La redirection après connexion réussie
+- Le stockage du token dans le localStorage
+
+### Implémentation
