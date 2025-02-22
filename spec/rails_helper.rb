@@ -1,7 +1,56 @@
-# This file is copied to spec/ when you run 'rails generate rspec:install'
+# frozen_string_literal: true
+
+# Charger SimpleCov avant TOUT
+require 'simplecov'
+
+# S'assurer que le répertoire existe
+require 'fileutils'
+FileUtils.mkdir_p 'coverage/rspec'
+
+# Configuration minimale de SimpleCov
+SimpleCov.configure do
+  # Forcer le chemin du rapport
+  SimpleCov.coverage_dir('coverage/rspec')
+  
+  enable_coverage :line
+  primary_coverage :line
+  refuse_coverage_drop
+  
+  # Filtrer les fichiers de base
+  add_filter do |source_file|
+    source_file.filename.include?('app/channels') ||
+    source_file.filename.include?('app/jobs') ||
+    source_file.filename.include?('app/mailers') ||
+    source_file.filename.include?('app/graphql/types/base_') ||
+    source_file.filename.include?('app/graphql/mutations/base_') ||
+    source_file.filename.include?('/test/') ||
+    source_file.filename.include?('/config/') ||
+    source_file.filename.include?('/vendor/') ||
+    source_file.filename.include?('/spec/')
+  end
+
+  # Grouper les fichiers
+  add_group 'Models', 'app/models'
+  add_group 'GraphQL', 'app/graphql'
+  add_group 'JWT', 'app/lib/jwt'
+
+  # Forcer un seul rapport
+  at_exit do
+    puts "\nGénération du rapport de couverture..."
+    SimpleCov.result.format!
+  end
+end
+
+# Démarrer SimpleCov avec le bon répertoire
+SimpleCov.start do
+  coverage_dir 'coverage/rspec'
+end
+
+# Charger l'environnement Rails
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
+
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 # Uncomment the line below in case you have `--require rails_helper` in the `.rspec` file

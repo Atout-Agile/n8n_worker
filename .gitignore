@@ -32,4 +32,11 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
-coverage/
+
+# Documentation générée
+/documentation/
+/.yardoc/
+/schema.graphql
+
+# Rapports de couverture
+/coverage/
