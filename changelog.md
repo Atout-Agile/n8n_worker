@@ -524,7 +524,7 @@ L'objectif principal est d'améliorer la gestion du projet en :
 La gestion de projet est maintenant configurée pour :
 - Suivre l'avancement des développements
 
-## [2025-02-22--0005]
+## [2025-02-23--0005]
 
 ### Ajout de la query User (issue [#16](https://github.com/votre-username/n8n_worker/issues/16) )
 
