@@ -11,8 +11,7 @@ class GraphqlController < ApplicationController
     query = params[:query]
     operation_name = params[:operationName]
     context = {
-      # Query context goes here, for example:
-      # current_user: current_user,
+      current_user: current_user_from_token || current_user,
     }
     result = N8nWorkerSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
@@ -48,5 +47,36 @@ class GraphqlController < ApplicationController
     logger.error e.backtrace.join("\n")
 
     render json: { errors: [{ message: e.message, backtrace: e.backtrace }], data: {} }, status: 500
+  end
+
+  def current_user_from_token
+    # Extraire le token du header Authorization
+    auth_header = request.headers['Authorization']
+    return nil unless auth_header
+
+    # Format attendu: "Bearer <token>"
+    token = auth_header.split(' ')[1]
+    return nil unless token
+
+    begin
+      # Décoder le token JWT pour obtenir l'utilisateur
+      payload = JsonWebToken.decode(token)
+      User.find_by(id: payload[:user_id])
+    rescue JWT::VerificationError, JWT::ExpiredSignature => e
+      Rails.logger.warn("Invalid JWT token: #{e.message}")
+      nil
+    end
+  end
+
+  def login_as(user)
+    # Configurer la session avec un token valide
+    token = JsonWebToken.encode(user_id: user.id)
+    
+    # Utiliser les helpers de test pour configurer la session
+    # ou mocker plus agressivement
+    allow_any_instance_of(ActionController::TestSession).to receive(:[]).with(:jwt_token).and_return(token)
+    
+    # Ou mocker complètement l'accès session
+    allow_any_instance_of(ApplicationController).to receive(:session).and_return({jwt_token: token})
   end
 end
