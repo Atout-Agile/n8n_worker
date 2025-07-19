@@ -73,6 +73,17 @@ RSpec.describe GraphqlController, type: :request do
         expect(response).to have_http_status(:success)
       end
 
+      it 'handles hash variables directly' do
+        post '/graphql', params: {
+          query: login_mutation,
+          variables: { email: user.email, password: 'password123' }  # Hash direct
+        }
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json['data']).to be_present
+      end
+
       it 'handles empty string variables' do
         post '/graphql', params: {
           query: valid_query,
@@ -108,6 +119,31 @@ RSpec.describe GraphqlController, type: :request do
             variables: []
           }
         }.to raise_error(ArgumentError, /Unexpected parameter/)
+      end
+    end
+
+    context 'testing prepare_variables method directly' do
+      let(:controller) { GraphqlController.new }
+
+      it 'handles Hash variables in prepare_variables' do
+        # Test the private method directly
+        result = controller.send(:prepare_variables, { test: 'value' })
+        expect(result).to eq({ test: 'value' })
+      end
+
+      it 'handles String variables in prepare_variables' do
+        result = controller.send(:prepare_variables, '{"test": "value"}')
+        expect(result).to eq({ 'test' => 'value' })
+      end
+
+      it 'handles nil variables in prepare_variables' do
+        result = controller.send(:prepare_variables, nil)
+        expect(result).to eq({})
+      end
+
+      it 'handles empty string variables in prepare_variables' do
+        result = controller.send(:prepare_variables, '')
+        expect(result).to eq({})
       end
     end
 
