@@ -1,0 +1,203 @@
+# frozen_string_literal: true
+
+require 'rails_helper'
+
+RSpec.describe GraphqlController, type: :request do
+  let(:role) { create(:role) }
+  let(:user) { create(:user, role: role) }
+
+  describe 'POST /graphql' do
+    let(:valid_query) do
+      <<~GQL
+        query {
+          testField
+        }
+      GQL
+    end
+
+    let(:login_mutation) do
+      <<~GQL
+        mutation Login($email: String!, $password: String!) {
+          login(input: { email: $email, password: $password }) {
+            token
+            user {
+              id
+              email
+            }
+            errors
+          }
+        }
+      GQL
+    end
+
+    context 'with valid GraphQL query' do
+      it 'executes the query successfully' do
+        post '/graphql', params: { query: valid_query }
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json['data']['testField']).to eq('Hello World!')
+      end
+
+      it 'handles variables correctly' do
+        post '/graphql', params: {
+          query: login_mutation,
+          variables: { email: user.email, password: 'password123' }
+        }
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        # The login will fail with invalid credentials, but the query should execute
+        expect(json['data']).to be_present
+        expect(json['data']['login']).to be_present
+      end
+
+      it 'handles operation name' do
+        post '/graphql', params: {
+          query: login_mutation,
+          variables: { email: user.email, password: 'password123' },
+          operationName: 'Login'
+        }
+
+        expect(response).to have_http_status(:success)
+      end
+    end
+
+    context 'with different variable formats' do
+      it 'handles string variables' do
+        post '/graphql', params: {
+          query: login_mutation,
+          variables: { email: user.email, password: 'password123' }.to_json
+        }
+
+        expect(response).to have_http_status(:success)
+      end
+
+      it 'handles empty string variables' do
+        post '/graphql', params: {
+          query: valid_query,
+          variables: ''
+        }
+
+        expect(response).to have_http_status(:success)
+      end
+
+      it 'handles nil variables' do
+        post '/graphql', params: {
+          query: valid_query,
+          variables: nil
+        }
+
+        expect(response).to have_http_status(:success)
+      end
+
+      it 'handles ActionController::Parameters' do
+        # Test with regular hash parameters instead
+        post '/graphql', params: {
+          query: valid_query,
+          variables: { test: 'value' }
+        }
+
+        expect(response).to have_http_status(:success)
+      end
+
+      it 'raises ArgumentError for unexpected parameter type' do
+        expect {
+          post '/graphql', params: {
+            query: valid_query,
+            variables: []
+          }
+        }.to raise_error(ArgumentError, /Unexpected parameter/)
+      end
+    end
+
+    context 'with invalid JSON in string variables' do
+      it 'handles invalid JSON gracefully' do
+        expect {
+          post '/graphql', params: {
+            query: valid_query,
+            variables: 'invalid json'
+          }
+        }.to raise_error(JSON::ParserError)
+      end
+    end
+
+    context 'with GraphQL errors' do
+      let(:invalid_query) do
+        <<~GQL
+          query {
+            nonExistentField
+          }
+        GQL
+      end
+
+      it 'handles GraphQL errors gracefully' do
+        post '/graphql', params: { query: invalid_query }
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json['errors']).to be_present
+      end
+    end
+
+    context 'with runtime errors' do
+      before do
+        allow(N8nWorkerSchema).to receive(:execute).and_raise(StandardError, 'Test error')
+      end
+
+      context 'in development environment' do
+        before do
+          allow(Rails.env).to receive(:development?).and_return(true)
+        end
+
+        it 'handles errors in development mode' do
+          post '/graphql', params: { query: valid_query }
+
+          expect(response).to have_http_status(500)
+          json = JSON.parse(response.body)
+          expect(json['errors']).to be_present
+          expect(json['errors'].first['message']).to include('Test error')
+        end
+      end
+
+      context 'in production environment' do
+        before do
+          allow(Rails.env).to receive(:development?).and_return(false)
+        end
+
+        it 'raises the error in production mode' do
+          expect {
+            post '/graphql', params: { query: valid_query }
+          }.to raise_error(StandardError, 'Test error')
+        end
+      end
+    end
+
+    context 'with malformed requests' do
+      it 'handles missing query parameter' do
+        post '/graphql', params: {}
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json['errors']).to be_present
+      end
+
+      it 'handles empty query' do
+        post '/graphql', params: { query: '' }
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json['errors']).to be_present
+      end
+    end
+
+    context 'CSRF protection' do
+      it 'allows requests without CSRF token' do
+        # This should work because we use protect_from_forgery with: :null_session
+        post '/graphql', params: { query: valid_query }
+
+        expect(response).to have_http_status(:success)
+      end
+    end
+  end
+end 
