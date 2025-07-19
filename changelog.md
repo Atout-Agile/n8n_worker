@@ -707,6 +707,55 @@ Cette version corrige les problèmes de tests identifiés lors de l'implémentat
 - ✅ **Factories chargées correctement** : Tous les tests de modèles passent
 - ✅ **Documentation mise à jour** : Instructions claires pour les tests
 
-```
+## [2025-07-19--0001]
+
+### Objectif : Amélioration de la couverture de code
+
+**Situation initiale** : La couverture de code était de 86.63%
+**Objectif** : Atteindre au minimum 90% de couverture de code
+
+### Tests ajoutés pour améliorer la couverture
+
+#### Tests du JsonWebToken (app/lib/json_web_token.rb)
+
+- **Tests des méthodes privées** :
+- **Tests d'intégration** :
+
+Fichiers modifiés :
+- spec/lib/json_web_token_spec.rb
+
+#### Tests du GraphqlController (app/controllers/graphql_controller.rb)
+
+- **Tests complets de la méthode `execute`** :
+- **Tests de la méthode privée `prepare_variables`** :
+
+Fichiers créés :
+- spec/requests/graphql_controller_spec.rb
+
+#### Tests du SessionsController (app/controllers/sessions_controller.rb)
+
+- **Tests de toutes les actions** :
+- **Tests des cas d'erreur** :
+- **Tests des méthodes privées** :
+
+Fichiers créés :
+- spec/requests/sessions_controller_spec.rb
+
+#### Tests de l'ApplicationController (app/controllers/application_controller.rb)
+
+- **Tests de base** :
+- **Tests des méthodes privées** :
+
+Fichiers créés :
+- spec/requests/application_controller_spec.rb
+
+### Résultats obtenus
+- **Couverture de code finale** : > 96.8%
 
 
+### Notes techniques
+- Les tests utilisent des mocks pour isoler les composants testés
+- Les variables d'environnement sont mockées pour tester les fallbacks
+- Les réponses GraphQL sont simulées pour tester tous les cas
+- Les tests de contrôleur utilisent des requêtes HTTP réelles
+- La couverture inclut maintenant les méthodes privées critiques
