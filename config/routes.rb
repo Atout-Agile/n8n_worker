@@ -1,7 +1,8 @@
 Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
-      get "tokens/create"
+      get "tokens/create", to: "tokens#create"
+      resources :tokens, only: [:create, :show]
     end
   end
   
