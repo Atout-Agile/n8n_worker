@@ -68,14 +68,82 @@ rails db:migrate
 
 ## Tests
 
-### Lancer la suite de tests
+### Prérequis
+Avant de lancer les tests, assurez-vous que l'environnement de test est correctement configuré :
+
 ```bash
-# Avec couverture de code
-rake test:coverage
+# Préparer la base de données de test
+RAILS_ENV=test rails db:create db:migrate
+
+# Vérifier que l'environnement est correctement défini
+RAILS_ENV=test rails db:environment:set RAILS_ENV=test
 ```
 
-Les rapports de couverture sont générés dans `coverage/`.
-Les captures d'écran des tests échoués sont dans `tmp/screenshots/`.
+### Lancer la suite de tests
+
+#### Option 1 : Avec couverture de code (recommandé)
+```bash
+RAILS_ENV=test rake test:coverage
+```
+
+#### Option 2 : Tests simples
+```bash
+# Tous les tests
+RAILS_ENV=test bundle exec rspec
+
+# Tests spécifiques
+RAILS_ENV=test bundle exec rspec spec/models/
+RAILS_ENV=test bundle exec rspec spec/graphql/
+RAILS_ENV=test bundle exec rspec spec/system/
+```
+
+#### Option 3 : Tests avec format détaillé
+```bash
+RAILS_ENV=test bundle exec rspec --format documentation
+```
+
+### Résultats et rapports
+
+- **Couverture de code** : Généré dans `coverage/` (format HTML)
+- **Captures d'écran** : Stockées dans `tmp/screenshots/` en cas d'échec des tests système
+- **Logs d'erreurs** : Affichés dans la console avec détails
+
+### Types de tests disponibles
+
+1. **Tests de modèles** (`spec/models/`)
+   - Validations et associations
+   - Factories et scopes
+
+2. **Tests GraphQL** (`spec/graphql/`)
+   - Mutations (Login, etc.)
+   - Queries (User, etc.)
+
+3. **Tests système** (`spec/system/`)
+   - Interface utilisateur
+   - Processus de login
+
+4. **Tests de services** (`spec/lib/`)
+   - Service JWT
+   - Helpers
+
+### Dépannage
+
+Si vous rencontrez des erreurs :
+
+1. **Migrations en attente** :
+   ```bash
+   RAILS_ENV=test rails db:migrate
+   ```
+
+2. **Base de données corrompue** :
+   ```bash
+   RAILS_ENV=test rails db:drop db:create db:migrate
+   ```
+
+3. **Problème d'environnement** :
+   ```bash
+   RAILS_ENV=test rails db:environment:set RAILS_ENV=test
+   ```
 
 ## API GraphQL
 
