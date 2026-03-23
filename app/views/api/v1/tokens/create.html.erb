@@ -29,6 +29,30 @@ Used by Api::V1::TokensController#create action.
     <div class="token-creation-form">
       <h2>Create New API Token</h2>
       <p>API tokens allow you to authenticate with our API programmatically.</p>
+
+      <%= form_with url: api_v1_tokens_path, method: :post do |f| %>
+        <% if @token&.errors&.any? %>
+          <div class="token-errors">
+            <ul>
+              <% @token.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="form-group">
+          <%= f.label :name, "Token Name" %>
+          <%= f.text_field :name, value: @token&.name, placeholder: "e.g. CI/CD Pipeline", required: true %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :expires_at, "Expiration Date (optional, defaults to 30 days)" %>
+          <%= f.date_field :expires_at, value: @token&.expires_at&.to_date, min: Date.tomorrow %>
+        </div>
+
+        <%= f.submit "Create Token" %>
+      <% end %>
     </div>
   <% end %>
 </div>

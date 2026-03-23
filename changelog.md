@@ -1,5 +1,19 @@
 # Changelog
 
+## [2026-03-23--0002]
+
+### Token Creation Form
+
+- Implemented the missing creation form in `app/views/api/v1/tokens/create.html.erb`
+  - Name field (required) with placeholder
+  - Optional expiration date picker (min: tomorrow, defaults to 30 days server-side)
+  - Inline validation error display
+- Expanded view spec with 4 cases: success state, raw token display, form render, validation errors
+
+Modified files:
+- `app/views/api/v1/tokens/create.html.erb`
+- `spec/views/api/v1/tokens/create.html.erb_spec.rb`
+
 ## [2026-03-23--0001]
 
 ### Ruby Upgrade: 3.3.5 → 3.4.8
