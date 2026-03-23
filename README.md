@@ -27,7 +27,7 @@ Puis accédez à :
 ## Configuration requise
 
 ### Versions
-- Ruby 3.3.5
+- Ruby 3.4.8
 - Rails 8.0.1
 - SQLite3 (base de données par défaut)
 

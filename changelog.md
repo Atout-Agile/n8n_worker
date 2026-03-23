@@ -1,5 +1,18 @@
 # Changelog
 
+## [2026-03-23--0001]
+
+### Ruby Upgrade: 3.3.5 → 3.4.8
+
+- Updated `.ruby-version` to `ruby-3.4.8`
+- Updated `Dockerfile` `RUBY_VERSION` argument to `3.4.8`
+- Updated `README.md` version requirement
+- Ran `bundle install` — all 152 gems installed cleanly
+- Fixed 3 pre-existing stale test expectations:
+  - `spec/requests/api/v1/tokens_spec.rb`: updated flash notice expectation from `"Token API created successfully"` to `"API token created successfully"`
+  - `spec/views/api/v1/tokens/create.html.erb_spec.rb`: updated rendered content expectation from French `"Token créé avec succès"` to English `"Token Created Successfully"`
+- All 130 tests pass, coverage at 96.38%
+
 ## [2025-02-22--0001]
 
 ### Project Creation
@@ -784,7 +797,7 @@ I want to create a GraphQL mutation that generates a new API token with an expir
 - Model creation for mutation
 - Validation creation for mutation
 
-## [2025-01-20--0001]
+## [2025-07-20--0001]
 
 ### ✅ **FEATURE COMPLETED: API Token Management System**
 

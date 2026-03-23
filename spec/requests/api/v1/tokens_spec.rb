@@ -47,7 +47,7 @@ RSpec.describe "Api::V1::Tokens", type: :request do
         }.to change(ApiToken, :count).by(1)
         
         expect(response).to have_http_status(:success)
-        expect(flash[:notice]).to eq("Token API created successfully")
+        expect(flash[:notice]).to eq("API token created successfully")
         
         token = ApiToken.last
         expect(token.user).to eq(user)
@@ -89,7 +89,7 @@ RSpec.describe "Api::V1::Tokens", type: :request do
         
         # Verify that the token was created successfully
         expect(response).to have_http_status(:success)
-        expect(flash[:notice]).to eq("Token API created successfully")
+        expect(flash[:notice]).to eq("API token created successfully")
         
         # Verify that the token in the database has a token_digest
         token = ApiToken.last

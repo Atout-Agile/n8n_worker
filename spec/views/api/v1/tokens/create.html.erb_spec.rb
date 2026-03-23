@@ -8,7 +8,7 @@ RSpec.describe 'api/v1/tokens/create', type: :view do
   it 'renders token creation success message' do
     assign(:token, token)
     render
-    expect(rendered).to include('Token créé avec succès')
+    expect(rendered).to include('Token Created Successfully')
     expect(rendered).to include(token.name)
   end
 end
