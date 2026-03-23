@@ -40,3 +40,6 @@
 
 # Rapports de couverture
 /coverage/
+
+# Claude configuration
+/CLAUDE.md
