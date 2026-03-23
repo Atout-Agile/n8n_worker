@@ -46,7 +46,7 @@ Afin de permettre la gestion des accès API
 En tant que développeur de l'application
 Je veux créer une query GraphQL qui liste tous les tokens actifs d'un utilisateur
 
-### Token Verification Query 
+### Token Verification Query [✓ Created in n8n_worker project]
 Sachant que les tokens API doivent être validés avant utilisation
 Afin de sécuriser l'accès à l'API
 En tant que développeur de l'application
