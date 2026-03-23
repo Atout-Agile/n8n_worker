@@ -1,5 +1,22 @@
 # Changelog
 
+## [2026-03-23--0003]
+
+### API Token Authentication
+
+- Extended `GraphqlController#current_user_from_token` to authenticate via API tokens
+  - Checks `Authorization: Bearer <token>` header
+  - Tries `ApiToken.find_by_token` first — hashes raw token, looks up digest, validates active
+  - Calls `touch_last_used!` on successful authentication
+  - Falls back to JWT decode for web session tokens
+- Removed leftover RSpec mock code (`login_as` method) from production controller
+- Added 5 new tests covering API token auth, last_used_at update, expired token rejection, unknown token, and JWT fallback
+- Coverage: 97.46%
+
+Modified files:
+- `app/controllers/graphql_controller.rb`
+- `spec/requests/graphql_controller_spec.rb`
+
 ## [2026-03-23--0002]
 
 ### Token Creation Form

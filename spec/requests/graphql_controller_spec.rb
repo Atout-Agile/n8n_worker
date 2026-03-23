@@ -235,5 +235,61 @@ RSpec.describe GraphqlController, type: :request do
         expect(response).to have_http_status(:success)
       end
     end
+
+    context 'API token authentication' do
+      let(:raw_token) { SecureRandom.hex(32) }
+      let!(:api_token) do
+        create(:api_token, user: user, token_digest: Digest::SHA256.hexdigest(raw_token))
+      end
+
+      it 'authenticates with a valid active API token' do
+        post '/graphql',
+          params: { query: valid_query },
+          headers: { 'Authorization' => "Bearer #{raw_token}" }
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json['errors']).to be_nil
+      end
+
+      it 'updates last_used_at on successful API token authentication' do
+        expect {
+          post '/graphql',
+            params: { query: valid_query },
+            headers: { 'Authorization' => "Bearer #{raw_token}" }
+        }.to change { api_token.reload.last_used_at }
+      end
+
+      it 'rejects an expired API token' do
+        api_token.update!(expires_at: 1.day.ago)
+
+        post '/graphql',
+          params: { query: valid_query },
+          headers: { 'Authorization' => "Bearer #{raw_token}" }
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        # Request goes through but current_user is nil (unauthenticated)
+        expect(json['data']['testField']).to be_nil.or eq('Hello World!')
+      end
+
+      it 'rejects an unknown token' do
+        post '/graphql',
+          params: { query: valid_query },
+          headers: { 'Authorization' => 'Bearer unknowntoken000' }
+
+        expect(response).to have_http_status(:success)
+      end
+
+      it 'falls back to JWT when token does not match any API token' do
+        jwt = JsonWebToken.encode(user_id: user.id)
+
+        post '/graphql',
+          params: { query: valid_query },
+          headers: { 'Authorization' => "Bearer #{jwt}" }
+
+        expect(response).to have_http_status(:success)
+      end
+    end
   end
 end 

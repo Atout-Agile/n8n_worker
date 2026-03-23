@@ -49,34 +49,34 @@ class GraphqlController < ApplicationController
     render json: { errors: [{ message: e.message, backtrace: e.backtrace }], data: {} }, status: 500
   end
 
+  # Authenticates the request from the Authorization header.
+  # Tries API token lookup first, then falls back to JWT session token.
+  #
+  # @return [User, nil] The authenticated user, or nil if authentication fails
+  # @note Accepts "Authorization: Bearer <token>" header
+  # @note API tokens are raw hex tokens stored as SHA256 digests
+  # @note JWT tokens encode user_id in their payload
   def current_user_from_token
-    # Extraire le token du header Authorization
     auth_header = request.headers['Authorization']
-    return nil unless auth_header
+    return nil unless auth_header&.start_with?('Bearer ')
 
-    # Format attendu: "Bearer <token>"
-    token = auth_header.split(' ')[1]
-    return nil unless token
+    token = auth_header.split(' ', 2)[1]
+    return nil if token.blank?
 
+    # Try API token first (raw hex token stored as SHA256 digest)
+    api_token = ApiToken.find_by_token(token)
+    if api_token&.active?
+      api_token.touch_last_used!
+      return api_token.user
+    end
+
+    # Fall back to JWT (used by web session and login mutation)
     begin
-      # Décoder le token JWT pour obtenir l'utilisateur
       payload = JsonWebToken.decode(token)
       User.find_by(id: payload[:user_id])
     rescue JWT::VerificationError, JWT::ExpiredSignature => e
       Rails.logger.warn("Invalid JWT token: #{e.message}")
       nil
     end
-  end
-
-  def login_as(user)
-    # Configurer la session avec un token valide
-    token = JsonWebToken.encode(user_id: user.id)
-    
-    # Utiliser les helpers de test pour configurer la session
-    # ou mocker plus agressivement
-    allow_any_instance_of(ActionController::TestSession).to receive(:[]).with(:jwt_token).and_return(token)
-    
-    # Ou mocker complètement l'accès session
-    allow_any_instance_of(ApplicationController).to receive(:session).and_return({jwt_token: token})
   end
 end
