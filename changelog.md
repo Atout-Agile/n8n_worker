@@ -1,5 +1,25 @@
 # Changelog
 
+## [2026-03-23--0005]
+
+### VerifyToken GraphQL Query
+
+- Created `app/graphql/queries/verify_token.rb`
+  - Accepts a `token` argument (raw string)
+  - Hashes it via SHA256, looks up the matching ApiToken
+  - Returns full `ApiTokenType` (id, name, active, expiresAt, lastUsedAt, user) if valid and active
+  - Returns `null` if token is not found, expired, or revoked
+- Registered `verifyToken` field in `query_type.rb`
+- Added 5 tests covering valid token, user association, expired, unknown, and revoked cases
+- Coverage: 97.32%
+
+New files:
+- `app/graphql/queries/verify_token.rb`
+- `spec/graphql/queries/verify_token_spec.rb`
+
+Modified files:
+- `app/graphql/types/query_type.rb`
+
 ## [2026-03-23--0004]
 
 ### RevokeApiToken GraphQL Mutation
