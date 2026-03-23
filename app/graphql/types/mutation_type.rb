@@ -18,6 +18,7 @@
 #
 # @see Mutations::Login
 # @see Mutations::CreateApiToken
+# @see Mutations::RevokeApiToken
 # @since Initial version
 module Types
   # Root mutation type for GraphQL schema
@@ -26,12 +27,18 @@ module Types
   #   @return [Mutations::Login] User authentication mutation
   # @!attribute [r] create_api_token
   #   @return [Mutations::CreateApiToken] API token creation mutation (added 2025-07-19)
+  # @!attribute [r] revoke_api_token
+  #   @return [Mutations::RevokeApiToken] API token revocation mutation (added 2026-03-23)
   class MutationType < Types::BaseObject
     # User login mutation
     field :login, mutation: Mutations::Login
-    
+
     # API token creation mutation
     # @since 2025-07-19
     field :create_api_token, mutation: Mutations::CreateApiToken
+
+    # API token revocation mutation
+    # @since 2026-03-23
+    field :revoke_api_token, mutation: Mutations::RevokeApiToken
   end
 end

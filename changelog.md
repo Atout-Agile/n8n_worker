@@ -1,5 +1,26 @@
 # Changelog
 
+## [2026-03-23--0004]
+
+### RevokeApiToken GraphQL Mutation
+
+- Created `app/graphql/mutations/revoke_api_token.rb`
+  - Accepts `id` argument (required)
+  - Returns `success` (Boolean) and `errors` (Array)
+  - Sets `expires_at` to `Time.current`, immediately invalidating the token
+  - Users can only revoke their own tokens
+  - Returns clear errors for unauthenticated requests or wrong-owner tokens
+- Registered `revokeApiToken` field in `mutation_type.rb`
+- Added 5 tests covering success, inactivation, wrong-owner, not-found, and unauthenticated cases
+- Coverage: 97.24%
+
+New files:
+- `app/graphql/mutations/revoke_api_token.rb`
+- `spec/graphql/mutations/revoke_api_token_spec.rb`
+
+Modified files:
+- `app/graphql/types/mutation_type.rb`
+
 ## [2026-03-23--0003]
 
 ### API Token Authentication
