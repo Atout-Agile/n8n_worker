@@ -14,24 +14,44 @@ RSpec.describe "Api::V1::Tokens", type: :request do
     allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(user)
   end
 
-  describe "GET /api/v1/tokens/create" do
-    context "with an existing token ID" do
+  describe "GET /api/v1/tokens" do
+    context "with existing tokens" do
       let!(:api_token) { create(:api_token, user: user) }
 
-      it "returns http success and displays the token" do
+      it "returns http success and lists tokens" do
         login_as(user)
-        get "/api/v1/tokens/create", params: { id: api_token.id }
+        get "/api/v1/tokens"
         expect(response).to have_http_status(:success)
         expect(response.body).to include(api_token.name)
       end
     end
 
-    context "without an ID (creating a new token)" do
-      it "redirects to the token creation page" do
+    context "with no tokens" do
+      it "redirects to the new token form" do
         login_as(user)
-        get "/api/v1/tokens/create", params: { name: "Test Token" }
-        expect(response).to have_http_status(:success)
+        get "/api/v1/tokens"
+        expect(response).to redirect_to(new_api_v1_token_path)
       end
+    end
+  end
+
+  describe "GET /api/v1/tokens/new" do
+    it "returns http success and displays the form" do
+      login_as(user)
+      get "/api/v1/tokens/new"
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Create token")
+    end
+  end
+
+  describe "GET /api/v1/tokens/:id" do
+    let!(:api_token) { create(:api_token, user: user) }
+
+    it "returns http success and displays the token" do
+      login_as(user)
+      get "/api/v1/tokens/#{api_token.id}"
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include(api_token.name)
     end
   end
 
