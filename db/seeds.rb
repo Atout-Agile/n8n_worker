@@ -65,4 +65,23 @@ else
   puts "An administrator account already exists with email: #{admin_email}"
 end
 
+# Create a seed API token for the admin account
+admin = User.find_by(email: admin_email)
+
+if admin
+  raw_token = SecureRandom.hex(32)
+  token = admin.api_tokens.create!(
+    name: 'Seed Token',
+    token_digest: Digest::SHA256.hexdigest(raw_token),
+    expires_at: 3.days.from_now
+  )
+  puts "Admin API token created:"
+  puts "- Name:    #{token.name}"
+  puts "- Token:   #{raw_token}"
+  puts "- Expires: #{token.expires_at.strftime('%Y-%m-%d')}"
+  puts "IMPORTANT: This token is only shown once — save it now!"
+else
+  puts "ERROR: Could not create API token — admin account not found."
+end
+
 puts "Initial setup completed."
