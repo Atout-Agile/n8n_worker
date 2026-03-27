@@ -16,7 +16,7 @@ RSpec.describe "Login Process", type: :system do
     fill_in 'password', with: 'password123'
     
     # Submit the form
-    click_button 'Log in'
+    click_button 'Sign in'
     
     # Wait for redirect
     expect(page).to have_current_path(dashboard_path)
@@ -38,10 +38,10 @@ RSpec.describe "Login Process", type: :system do
     fill_in 'password', with: 'wrong_password'
     
     # Submit the form
-    click_button 'Log in'
+    click_button 'Sign in'
     
     # Verify errors are displayed
-    expect(page).to have_selector('.alert-danger')
+    expect(page).to have_selector('.bg-red-50')
     expect(page).to have_content('Email ou mot de passe invalide')
     
     # Verify we stay on the login page
@@ -53,7 +53,7 @@ RSpec.describe "Login Process", type: :system do
     visit login_path
     fill_in 'email', with: 'test@example.com'
     fill_in 'password', with: 'password123'
-    click_button 'Log in'
+    click_button 'Sign in'
     
     # Wait for redirect
     expect(page).to have_current_path(dashboard_path)
