@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+ENV['RAILS_ENV'] ||= 'test'
+
 # Charger les dépendances
 require_relative '../config/environment'
 require 'simplecov'
