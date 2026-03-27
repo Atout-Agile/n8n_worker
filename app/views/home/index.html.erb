@@ -1,7 +1,16 @@
-<div class="home-container">
-  <h1>Welcome to N8N Worker</h1>
-  
-  <p>Please log in to access the application.</p>
-  
-  <%= link_to "Log in", login_path, class: "btn btn-primary" %>
-</div> 
+<% content_for :title, "N8N Worker" %>
+<% content_for :no_navbar, true %>
+<% content_for :main_class, "min-h-screen flex items-center justify-center px-4" %>
+
+<div class="text-center max-w-lg">
+  <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600 mb-6">
+    <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M13 10V3L4 14h7v7l9-11h-7z" />
+    </svg>
+  </div>
+  <h1 class="text-3xl font-bold text-gray-900 mb-3">N8N Worker</h1>
+  <p class="text-gray-500 mb-8">Secure GraphQL API bridge for your n8n workflows.</p>
+  <%= link_to "Sign in", login_path,
+        class: "inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors" %>
+</div>

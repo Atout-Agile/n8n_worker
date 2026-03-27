@@ -57,6 +57,9 @@ group :development do
 end
 
 
+gem "tailwindcss-rails", "~> 3.3"
+gem "foreman", "~> 0.90", require: false
+
 gem "graphql", "~> 2.4"
 gem "graphiql-rails", group: :development
 

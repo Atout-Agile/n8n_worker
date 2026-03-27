@@ -18,11 +18,18 @@
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= yield %>
+  <body class="bg-gray-50 text-gray-900 antialiased">
+    <% if content_for?(:no_navbar) %>
+    <% else %>
+      <%= render 'shared/navbar' if current_user %>
+    <% end %>
+    <main class="<%= content_for?(:main_class) ? yield(:main_class) : 'max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10' %>">
+      <%= yield %>
+    </main>
   </body>
 </html>

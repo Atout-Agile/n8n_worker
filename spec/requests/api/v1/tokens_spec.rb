@@ -14,24 +14,44 @@ RSpec.describe "Api::V1::Tokens", type: :request do
     allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(user)
   end
 
-  describe "GET /api/v1/tokens/create" do
-    context "with an existing token ID" do
+  describe "GET /api/v1/tokens" do
+    context "with existing tokens" do
       let!(:api_token) { create(:api_token, user: user) }
 
-      it "returns http success and displays the token" do
+      it "returns http success and lists tokens" do
         login_as(user)
-        get "/api/v1/tokens/create", params: { id: api_token.id }
+        get "/api/v1/tokens"
         expect(response).to have_http_status(:success)
         expect(response.body).to include(api_token.name)
       end
     end
 
-    context "without an ID (creating a new token)" do
-      it "redirects to the token creation page" do
+    context "with no tokens" do
+      it "redirects to the new token form" do
         login_as(user)
-        get "/api/v1/tokens/create", params: { name: "Test Token" }
-        expect(response).to have_http_status(:success)
+        get "/api/v1/tokens"
+        expect(response).to redirect_to(new_api_v1_token_path)
       end
+    end
+  end
+
+  describe "GET /api/v1/tokens/new" do
+    it "returns http success and displays the form" do
+      login_as(user)
+      get "/api/v1/tokens/new"
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Create token")
+    end
+  end
+
+  describe "GET /api/v1/tokens/:id" do
+    let!(:api_token) { create(:api_token, user: user) }
+
+    it "returns http success and displays the token" do
+      login_as(user)
+      get "/api/v1/tokens/#{api_token.id}"
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include(api_token.name)
     end
   end
 
@@ -45,11 +65,10 @@ RSpec.describe "Api::V1::Tokens", type: :request do
         expect {
           post "/api/v1/tokens", params: valid_params
         }.to change(ApiToken, :count).by(1)
-        
-        expect(response).to have_http_status(:success)
-        expect(flash[:notice]).to eq("API token created successfully")
-        
+
         token = ApiToken.last
+        expect(response).to redirect_to(api_v1_token_path(token))
+        expect(flash[:notice]).to eq("API token created successfully")
         expect(token.user).to eq(user)
         expect(token.name).to eq("Mon Token API")
         expect(token.token_digest).to be_present
@@ -86,18 +105,12 @@ RSpec.describe "Api::V1::Tokens", type: :request do
       it "exposes the raw token after creation" do
         login_as(user)
         post "/api/v1/tokens", params: valid_params
-        
-        # Verify that the token was created successfully
-        expect(response).to have_http_status(:success)
-        expect(flash[:notice]).to eq("API token created successfully")
-        
-        # Verify that the token in the database has a token_digest
+
         token = ApiToken.last
-        expect(token.token_digest).to be_present
-        expect(token.token_digest.length).to eq(64) # SHA256 hex digest length
-        
-        # The raw token is only available in the view, we cannot test it directly here
-        # but we can verify that the digest corresponds to a 32-byte token (64 hex characters)
+        expect(response).to redirect_to(api_v1_token_path(token))
+        expect(flash[:raw_token]).to be_present
+        expect(flash[:raw_token].length).to eq(64) # SecureRandom.hex(32)
+        expect(token.token_digest).to eq(Digest::SHA256.hexdigest(flash[:raw_token]))
       end
     end
 
@@ -107,31 +120,92 @@ RSpec.describe "Api::V1::Tokens", type: :request do
         expect {
           post "/api/v1/tokens", params: invalid_params
         }.not_to change(ApiToken, :count)
-        
-        expect(response).to have_http_status(:success)
-        expect(flash[:alert]).to include("Error creating token")
+
+        expect(response).to have_http_status(:unprocessable_entity)
       end
     end
 
     context "with a name already used by the user" do
       let!(:existing_token) { create(:api_token, user: user, name: "Mon Token API") }
-      
+
       it "does not create a token and displays an error" do
         login_as(user)
         expect {
           post "/api/v1/tokens", params: { name: "Mon Token API" }
         }.not_to change(ApiToken, :count)
-        
-        expect(response).to have_http_status(:success)
-        expect(flash[:alert]).to include("You already have a token with this name")
+
+        expect(response).to have_http_status(:unprocessable_entity)
       end
+    end
+  end
+
+  describe "PATCH /api/v1/tokens/:id/revoke" do
+    let!(:api_token) { create(:api_token, user: user) }
+
+    it "sets expires_at to now, making the token inactive" do
+      login_as(user)
+      expect(api_token.active?).to be true
+      patch "/api/v1/tokens/#{api_token.id}/revoke"
+      expect(response).to redirect_to(api_v1_tokens_path)
+      expect(flash[:notice]).to include("has been revoked")
+      expect(api_token.reload.active?).to be false
+    end
+
+    it "does not affect tokens belonging to another user" do
+      other_user = create(:user, role: role)
+      other_token = create(:api_token, user: other_user)
+      login_as(user)
+      patch "/api/v1/tokens/#{other_token.id}/revoke"
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe "PATCH /api/v1/tokens/:id/renew" do
+    let!(:api_token) { create(:api_token, user: user, expires_at: 1.day.from_now) }
+
+    it "extends expiration by 30 days from now" do
+      login_as(user)
+      patch "/api/v1/tokens/#{api_token.id}/renew"
+      expect(response).to redirect_to(api_v1_tokens_path)
+      expect(flash[:notice]).to include("renewed")
+      expect(api_token.reload.expires_at).to be_within(1.minute).of(30.days.from_now)
+    end
+
+    it "renews an already expired token" do
+      api_token.update!(expires_at: 1.day.ago)
+      login_as(user)
+      patch "/api/v1/tokens/#{api_token.id}/renew"
+      expect(api_token.reload.active?).to be true
+    end
+  end
+
+  describe "DELETE /api/v1/tokens/:id" do
+    let!(:api_token) { create(:api_token, user: user) }
+
+    it "deletes the token" do
+      login_as(user)
+      expect {
+        delete "/api/v1/tokens/#{api_token.id}"
+      }.to change(ApiToken, :count).by(-1)
+      expect(response).to redirect_to(api_v1_tokens_path)
+      expect(flash[:notice]).to include("has been deleted")
+    end
+
+    it "does not allow deleting another user's token" do
+      other_user = create(:user, role: role)
+      other_token = create(:api_token, user: other_user)
+      login_as(user)
+      expect {
+        delete "/api/v1/tokens/#{other_token.id}"
+      }.not_to change(ApiToken, :count)
+      expect(response).to have_http_status(:not_found)
     end
   end
 
   describe "authentication" do
     context "without a logged-in user" do
-      it "redirects to the login page" do
-        get "/api/v1/tokens/create"
+      it "redirects to the login page for GET index" do
+        get "/api/v1/tokens"
         expect(response).to redirect_to(login_path)
       end
 
