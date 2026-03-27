@@ -139,10 +139,73 @@ RSpec.describe "Api::V1::Tokens", type: :request do
     end
   end
 
+  describe "PATCH /api/v1/tokens/:id/revoke" do
+    let!(:api_token) { create(:api_token, user: user) }
+
+    it "sets expires_at to now, making the token inactive" do
+      login_as(user)
+      expect(api_token.active?).to be true
+      patch "/api/v1/tokens/#{api_token.id}/revoke"
+      expect(response).to redirect_to(api_v1_tokens_path)
+      expect(flash[:notice]).to include("has been revoked")
+      expect(api_token.reload.active?).to be false
+    end
+
+    it "does not affect tokens belonging to another user" do
+      other_user = create(:user, role: role)
+      other_token = create(:api_token, user: other_user)
+      login_as(user)
+      patch "/api/v1/tokens/#{other_token.id}/revoke"
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe "PATCH /api/v1/tokens/:id/renew" do
+    let!(:api_token) { create(:api_token, user: user, expires_at: 1.day.from_now) }
+
+    it "extends expiration by 30 days from now" do
+      login_as(user)
+      patch "/api/v1/tokens/#{api_token.id}/renew"
+      expect(response).to redirect_to(api_v1_tokens_path)
+      expect(flash[:notice]).to include("renewed")
+      expect(api_token.reload.expires_at).to be_within(1.minute).of(30.days.from_now)
+    end
+
+    it "renews an already expired token" do
+      api_token.update!(expires_at: 1.day.ago)
+      login_as(user)
+      patch "/api/v1/tokens/#{api_token.id}/renew"
+      expect(api_token.reload.active?).to be true
+    end
+  end
+
+  describe "DELETE /api/v1/tokens/:id" do
+    let!(:api_token) { create(:api_token, user: user) }
+
+    it "deletes the token" do
+      login_as(user)
+      expect {
+        delete "/api/v1/tokens/#{api_token.id}"
+      }.to change(ApiToken, :count).by(-1)
+      expect(response).to redirect_to(api_v1_tokens_path)
+      expect(flash[:notice]).to include("has been deleted")
+    end
+
+    it "does not allow deleting another user's token" do
+      other_user = create(:user, role: role)
+      other_token = create(:api_token, user: other_user)
+      login_as(user)
+      expect {
+        delete "/api/v1/tokens/#{other_token.id}"
+      }.not_to change(ApiToken, :count)
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
   describe "authentication" do
     context "without a logged-in user" do
-      it "redirects to the login page" do
-        get "/api/v1/tokens/create"
+      it "redirects to the login page for GET index" do
+        get "/api/v1/tokens"
         expect(response).to redirect_to(login_path)
       end
 
