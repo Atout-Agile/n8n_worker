@@ -71,14 +71,12 @@ module Api
         @token.expires_at ||= 30.days.from_now
 
         if @token.save
-          # Add the raw token for display (visible only at creation)
-          @token.define_singleton_method(:raw_token) { raw_token }
-          flash[:notice] = "API token created successfully"
+          # Store the raw token in flash — visible only once, on the next request
+          flash[:raw_token] = raw_token
+          redirect_to api_v1_token_path(@token), notice: "API token created successfully"
         else
-          flash[:alert] = "Error creating token: #{@token.errors.full_messages.join(', ')}"
+          render :create, status: :unprocessable_entity
         end
-        
-        render :create
       end
 
       private

@@ -45,11 +45,10 @@ RSpec.describe "Api::V1::Tokens", type: :request do
         expect {
           post "/api/v1/tokens", params: valid_params
         }.to change(ApiToken, :count).by(1)
-        
-        expect(response).to have_http_status(:success)
-        expect(flash[:notice]).to eq("API token created successfully")
-        
+
         token = ApiToken.last
+        expect(response).to redirect_to(api_v1_token_path(token))
+        expect(flash[:notice]).to eq("API token created successfully")
         expect(token.user).to eq(user)
         expect(token.name).to eq("Mon Token API")
         expect(token.token_digest).to be_present
@@ -86,18 +85,12 @@ RSpec.describe "Api::V1::Tokens", type: :request do
       it "exposes the raw token after creation" do
         login_as(user)
         post "/api/v1/tokens", params: valid_params
-        
-        # Verify that the token was created successfully
-        expect(response).to have_http_status(:success)
-        expect(flash[:notice]).to eq("API token created successfully")
-        
-        # Verify that the token in the database has a token_digest
+
         token = ApiToken.last
-        expect(token.token_digest).to be_present
-        expect(token.token_digest.length).to eq(64) # SHA256 hex digest length
-        
-        # The raw token is only available in the view, we cannot test it directly here
-        # but we can verify that the digest corresponds to a 32-byte token (64 hex characters)
+        expect(response).to redirect_to(api_v1_token_path(token))
+        expect(flash[:raw_token]).to be_present
+        expect(flash[:raw_token].length).to eq(64) # SecureRandom.hex(32)
+        expect(token.token_digest).to eq(Digest::SHA256.hexdigest(flash[:raw_token]))
       end
     end
 
@@ -107,23 +100,21 @@ RSpec.describe "Api::V1::Tokens", type: :request do
         expect {
           post "/api/v1/tokens", params: invalid_params
         }.not_to change(ApiToken, :count)
-        
-        expect(response).to have_http_status(:success)
-        expect(flash[:alert]).to include("Error creating token")
+
+        expect(response).to have_http_status(:unprocessable_entity)
       end
     end
 
     context "with a name already used by the user" do
       let!(:existing_token) { create(:api_token, user: user, name: "Mon Token API") }
-      
+
       it "does not create a token and displays an error" do
         login_as(user)
         expect {
           post "/api/v1/tokens", params: { name: "Mon Token API" }
         }.not_to change(ApiToken, :count)
-        
-        expect(response).to have_http_status(:success)
-        expect(flash[:alert]).to include("You already have a token with this name")
+
+        expect(response).to have_http_status(:unprocessable_entity)
       end
     end
   end
