@@ -9,7 +9,7 @@ RSpec.describe 'api/v1/tokens/create', type: :view do
     it 'renders token creation success message with name and expiration' do
       assign(:token, token)
       render
-      expect(rendered).to include('Token Created Successfully')
+      expect(rendered).to include('Token created successfully')
       expect(rendered).to include(token.name)
     end
 
@@ -28,9 +28,9 @@ RSpec.describe 'api/v1/tokens/create', type: :view do
     it 'renders the creation form' do
       assign(:token, token)
       render
-      expect(rendered).to include('Create New API Token')
-      expect(rendered).to include('Token Name')
-      expect(rendered).to include('Create Token')
+      expect(rendered).to include('Create new token')
+      expect(rendered).to include('Token name')
+      expect(rendered).to include('Create token')
     end
 
     it 'shows validation errors when present' do

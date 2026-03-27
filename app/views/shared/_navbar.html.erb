@@ -1,0 +1,24 @@
+<nav class="bg-white border-b border-gray-200">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Brand -->
+      <div class="flex items-center gap-2">
+        <div class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <%= link_to "N8N Worker", dashboard_path, class: "text-sm font-semibold text-gray-900" %>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-4">
+        <%= link_to "API Tokens", api_v1_tokens_create_path,
+              class: "text-sm text-gray-600 hover:text-gray-900 transition-colors" %>
+        <%= button_to "Sign out", logout_path, method: :delete,
+              class: "text-sm font-medium text-red-600 hover:text-red-700 transition-colors bg-transparent border-0 cursor-pointer p-0" %>
+      </div>
+    </div>
+  </div>
+</nav>

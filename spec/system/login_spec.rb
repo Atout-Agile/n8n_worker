@@ -22,12 +22,12 @@ RSpec.describe "Login Process", type: :system do
     expect(page).to have_current_path(dashboard_path)
     
     # Verify user is logged in
-    expect(page).to have_content('Welcome, ' + user.name)
+    expect(page).to have_content('Welcome back, ' + user.name)
     
     # Verify token is stored in localStorage
     # Note: localStorage might not work in test environment, so we check session instead
     expect(page).to have_current_path(dashboard_path)
-    expect(page).to have_content('Welcome, ' + user.name)
+    expect(page).to have_content('Welcome back, ' + user.name)
   end
   
   it "shows validation errors with invalid credentials" do
