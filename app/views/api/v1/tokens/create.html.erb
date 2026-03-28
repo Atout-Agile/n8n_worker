@@ -1,11 +1,58 @@
-<h1>Api::V1::Tokens#create</h1>
-<p>Find me in app/views/api/v1/tokens/create.html.erb</p>
+<%# 
+API Token Creation View
+Displays the result of token creation or the creation form.
+Used by Api::V1::TokensController#create action.
 
-<div class="token-creation">
-  <h2>Token créé avec succès</h2>
+@param token [ApiToken] The token instance (new or created)
+%>
+
+<div class="api-token-creation">
+  <h1>API Token Management</h1>
   
-  <div class="token-details">
-    <p><strong>Nom :</strong> <%= @token.name %></p>
-    <p><strong>Expire le :</strong> <%= format_token_expiration(@token.expires_at) %></p>
-  </div>
+  <% if @token&.persisted? %>
+    <div class="token-creation-success">
+      <h2>Token Created Successfully</h2>
+      
+      <div class="token-details">
+        <p><strong>Name:</strong> <%= @token.name %></p>
+        <p><strong>Expires on:</strong> <%= @token.expires_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+        
+        <% if @token.respond_to?(:raw_token) %>
+          <div class="token-value">
+            <p><strong>Token (save this - it won't be shown again):</strong></p>
+            <code class="api-token-code"><%= @token.raw_token %></code>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <div class="token-creation-form">
+      <h2>Create New API Token</h2>
+      <p>API tokens allow you to authenticate with our API programmatically.</p>
+
+      <%= form_with url: api_v1_tokens_path, method: :post do |f| %>
+        <% if @token&.errors&.any? %>
+          <div class="token-errors">
+            <ul>
+              <% @token.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="form-group">
+          <%= f.label :name, "Token Name" %>
+          <%= f.text_field :name, value: @token&.name, placeholder: "e.g. CI/CD Pipeline", required: true %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :expires_at, "Expiration Date (optional, defaults to 30 days)" %>
+          <%= f.date_field :expires_at, value: @token&.expires_at&.to_date, min: Date.tomorrow %>
+        </div>
+
+        <%= f.submit "Create Token" %>
+      <% end %>
+    </div>
+  <% end %>
 </div>
