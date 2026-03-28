@@ -11,8 +11,7 @@ class GraphqlController < ApplicationController
     query = params[:query]
     operation_name = params[:operationName]
     context = {
-      # Query context goes here, for example:
-      # current_user: current_user,
+      current_user: current_user_from_token || current_user,
     }
     result = N8nWorkerSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
@@ -48,5 +47,36 @@ class GraphqlController < ApplicationController
     logger.error e.backtrace.join("\n")
 
     render json: { errors: [{ message: e.message, backtrace: e.backtrace }], data: {} }, status: 500
+  end
+
+  # Authenticates the request from the Authorization header.
+  # Tries API token lookup first, then falls back to JWT session token.
+  #
+  # @return [User, nil] The authenticated user, or nil if authentication fails
+  # @note Accepts "Authorization: Bearer <token>" header
+  # @note API tokens are raw hex tokens stored as SHA256 digests
+  # @note JWT tokens encode user_id in their payload
+  def current_user_from_token
+    auth_header = request.headers['Authorization']
+    return nil unless auth_header&.start_with?('Bearer ')
+
+    token = auth_header.split(' ', 2)[1]
+    return nil if token.blank?
+
+    # Try API token first (raw hex token stored as SHA256 digest)
+    api_token = ApiToken.find_by_token(token)
+    if api_token&.active?
+      api_token.touch_last_used!
+      return api_token.user
+    end
+
+    # Fall back to JWT (used by web session and login mutation)
+    begin
+      payload = JsonWebToken.decode(token)
+      User.find_by(id: payload[:user_id])
+    rescue JWT::VerificationError, JWT::ExpiredSignature => e
+      Rails.logger.warn("Invalid JWT token: #{e.message}")
+      nil
+    end
   end
 end
