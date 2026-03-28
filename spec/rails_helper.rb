@@ -90,6 +90,9 @@ RSpec.configure do |config|
   # Configurer FactoryBot
   config.include FactoryBot::Syntax::Methods
 
+  # Charger automatiquement tous les fichiers de support
+  Dir[Rails.root.join('spec/support/**/*.rb')].sort.each { |f| require f }
+
   config.before(:suite) do
     FileUtils.mkdir_p('tmp/screenshots')
   end

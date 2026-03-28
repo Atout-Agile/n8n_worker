@@ -29,5 +29,8 @@ module Types
     end
 
     field :user, resolver: Queries::User
+
+    # @since 2026-03-23
+    field :verify_token, resolver: Queries::VerifyToken
   end
 end
