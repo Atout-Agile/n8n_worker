@@ -1,0 +1,36 @@
+<%# 
+API Token Details View
+Displays information about a specific API token.
+Used by Api::V1::TokensController#show action.
+
+@param token [ApiToken] The token to display
+%>
+
+<div class="api-token-details">
+  <h1>API Token Details</h1>
+  
+  <div class="token-info">
+    <h2><%= @token.name %></h2>
+    
+    <div class="token-metadata">
+      <p><strong>Token ID:</strong> <%= @token.id %></p>
+      <p><strong>Created:</strong> <%= @token.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+      <p><strong>Expires:</strong> <%= @token.expires_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+      <p><strong>Status:</strong> 
+        <span class="<%= @token.active? ? 'active' : 'expired' %>">
+          <%= @token.active? ? 'Active' : 'Expired' %>
+        </span>
+      </p>
+      
+      <% if @token.last_used_at %>
+        <p><strong>Last Used:</strong> <%= @token.last_used_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+      <% else %>
+        <p><strong>Last Used:</strong> Never</p>
+      <% end %>
+    </div>
+    
+    <div class="token-security-notice">
+      <p><em>Note: The actual token value is only shown once during creation for security purposes.</em></p>
+    </div>
+  </div>
+</div> 

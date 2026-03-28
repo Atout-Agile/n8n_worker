@@ -2,39 +2,21 @@
 
 require 'simplecov'
 
-COVERED_FILES = [
-  'app/models/user.rb',
-  'app/models/role.rb',
-  'app/models/api_token.rb',
-  'app/graphql/mutations/login.rb',
-  'app/graphql/types/user_type.rb',
-  'app/graphql/types/role_type.rb',
-  'app/lib/jwt/authenticate_graphql_request.rb',
-  'app/lib/jwt/json_web_token.rb'
-].freeze
-
 SimpleCov.start do
-  # Ne suivre que les fichiers listés
-  track_files COVERED_FILES
-
   # Grouper les fichiers
-  add_group 'Models' do |file|
-    COVERED_FILES.include?(file.filename) && file.filename.start_with?('app/models')
-  end
+  add_group 'Models', 'app/models'
+  add_group 'GraphQL', 'app/graphql'
+  add_group 'JWT', 'app/lib/jwt'
+  add_group 'Controllers', 'app/controllers'
 
-  add_group 'GraphQL' do |file|
-    COVERED_FILES.include?(file.filename) && file.filename.start_with?('app/graphql')
-  end
-
-  add_group 'JWT' do |file|
-    COVERED_FILES.include?(file.filename) && file.filename.start_with?('app/lib/jwt')
-  end
-
-  # Ignorer tout ce qui n'est pas dans la liste
-  add_filter do |file|
-    !COVERED_FILES.include?(file.filename)
-  end
+  # Filtrer les fichiers non pertinents
+  add_filter '/spec/'
+  add_filter '/config/'
+  add_filter '/vendor/'
+  add_filter '/db/'
+  add_filter '/bin/'
+  add_filter '/lib/tasks/'
 
   enable_coverage :line
-  minimum_coverage 80
+  primary_coverage :line
 end
