@@ -269,6 +269,14 @@ RSpec.describe "Api::V1::Tokens", type: :request do
       patch "/api/v1/tokens/#{api_token.id}/renew"
       expect(api_token.reload.active?).to be true
     end
+
+    it "does not allow renewing another user's token" do
+      other_user = create(:user, role: role)
+      other_token = create(:api_token, user: other_user)
+      login_as(user)
+      patch "/api/v1/tokens/#{other_token.id}/renew"
+      expect(response).to have_http_status(:not_found)
+    end
   end
 
   describe "DELETE /api/v1/tokens/:id" do

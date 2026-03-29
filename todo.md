@@ -387,17 +387,17 @@ Seul `role.permissions.delete(perm)` est testé. Aucun test pour `role.permissio
 - Ajouter un exemple couvrant la réaffectation complète
 - Vérifier que les tokens perdent bien les permissions retirées dans ce cas
 
-### [TESTS] Aucun test d'isolation entre utilisateurs dans le contrôleur REST tokens [⌛]
+### [TESTS] Aucun test d'isolation entre utilisateurs dans le contrôleur REST tokens [✓]
 `spec/requests/api/v1/tokens_spec.rb`
 Les actions `revoke`, `renew`, `destroy` ne vérifient pas qu'un utilisateur ne peut pas agir sur les tokens d'un autre.
 - Ajouter un test : user A ne peut pas révoquer/renouveler/supprimer le token de user B
 - Vérifier que la réponse est 404 (pas une fuite d'information)
 
-### [TESTS] Comportement de `verifyToken` avec un token expiré non spécifié [⌛]
+### [TESTS] Comportement de `verifyToken` avec un token expiré non spécifié [✓]
 `spec/graphql/queries/verify_token_spec.rb`
 Un token expiré — retourne-t-il `null` ou une erreur ? Comportement non testé ni documenté.
-- Décider du comportement attendu
-- Ajouter un test explicite pour un token expiré
+- Décision : retourne `null` (comportement identique à un token inconnu ou révoqué)
+- Test explicite ajouté pour token expiré, token révoqué, token inconnu
 
 ### [MINEUR] Seed token créé sans aucune permission [⌛]
 `db/seeds.rb`
