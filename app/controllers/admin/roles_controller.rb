@@ -45,14 +45,8 @@ module Admin
 
       active_permission_ids = Permission.where(id: permitted_ids, deprecated: false).pluck(:id)
 
-      @role.permission_ids = active_permission_ids
-
-      if @role.save
-        redirect_to admin_roles_path, notice: "Permissions updated for role \"#{@role.name}\"."
-      else
-        @permissions = Permission.order(:name)
-        render :edit, status: :unprocessable_entity
-      end
+      @role.assign_permissions(active_permission_ids)
+      redirect_to admin_roles_path, notice: "Permissions updated for role \"#{@role.name}\"."
     end
 
     private

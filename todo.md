@@ -329,7 +329,7 @@ La protection CSRF est désactivée globalement. Un utilisateur connecté via se
 - Appliquer `protect_from_forgery with: :exception` par défaut
 - Passer en `null_session` uniquement quand la requête porte un header `Authorization` (token API)
 
-### [BUG] Cascade incomplète lors de la réaffectation des permissions d'un rôle [⌛]
+### [BUG] Cascade incomplète lors de la réaffectation des permissions d'un rôle [✓]
 `app/models/role.rb` — callback `after_remove` sur `has_many :permissions`
 Le callback `after_remove` se déclenche pour `role.permissions.delete(perm)` mais **pas** pour `role.permission_ids = [...]` (bulk assignment), ni pour `role.permissions = [...]`.
 Or `UpdateRolePermissions` utilise une réaffectation complète.
@@ -381,7 +381,7 @@ Le template appelle `role.permissions.order(:name)` sur chaque rôle. Même avec
 - Remplacer `role.permissions.order(:name)` par `role.permissions.sort_by(&:name)` dans la vue
 - Ou eager-loader les permissions triées depuis le controller
 
-### [TESTS] Cascade non couverte par réaffectation de permissions [⌛]
+### [TESTS] Cascade non couverte par réaffectation de permissions [✓]
 `spec/models/role_permission_spec.rb`
 Seul `role.permissions.delete(perm)` est testé. Aucun test pour `role.permissions = [other_perm]`.
 - Ajouter un exemple couvrant la réaffectation complète
