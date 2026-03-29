@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 class GraphqlController < ApplicationController
-  # If accessing from outside this domain, nullify the session
-  # This allows for outside API access while preventing CSRF attacks,
-  # but you'll have to authenticate your user separately
-  protect_from_forgery with: :null_session
+  # CSRF protection:
+  # - Requests carrying an Authorization header are API clients (token or JWT);
+  #   they are exempt from CSRF verification because they do not rely on cookies.
+  # - Session-based requests (web UI) must supply a valid CSRF token.
+  protect_from_forgery with: :exception
+  skip_before_action :verify_authenticity_token, if: :api_request?
 
   def execute
     variables = prepare_variables(params[:variables])
@@ -61,6 +63,15 @@ class GraphqlController < ApplicationController
     logger.error e.backtrace.join("\n")
 
     render json: { errors: [{ message: e.message, backtrace: e.backtrace }], data: {} }, status: 500
+  end
+
+  # Returns true when the request carries an Authorization header.
+  # Used to skip CSRF verification for API clients (token or JWT auth).
+  #
+  # @return [Boolean]
+  # @api private
+  def api_request?
+    request.headers['Authorization'].present?
   end
 
   # Resolves the authenticated user and API token from the Authorization header.

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1] — 2026-03-29
+
+### Security fixes
+
+- **Timing attack** — `ApiToken.find_by_token` now uses `ActiveSupport::SecurityUtils.secure_compare` for constant-time digest comparison; blank/nil inputs return `nil` immediately
+- **CSRF** — `GraphqlController` now uses `protect_from_forgery with: :exception`; CSRF verification is skipped only for requests carrying an `Authorization` header (API token or JWT clients), session-based requests are fully protected
+
+---
+
 ## [0.2.0] — 2026-03-29
 
 ### Permission system
