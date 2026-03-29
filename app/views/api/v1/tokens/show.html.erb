@@ -53,6 +53,21 @@ Used by Api::V1::TokensController#show action.
     </div>
   </dl>
 
+  <div class="mt-4 pt-4 border-t border-gray-100">
+    <p class="text-xs font-medium text-gray-500 mb-2">Permissions</p>
+    <% if @token.permissions.any? %>
+      <div class="flex flex-wrap gap-1.5">
+        <% @token.permissions.order(:name).each do |perm| %>
+          <span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 ring-1 ring-indigo-600/20">
+            <%= perm.name %>
+          </span>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-xs text-gray-400 italic">No permissions assigned — this token cannot access protected operations.</p>
+    <% end %>
+  </div>
+
   <% if flash[:raw_token] %>
     <div class="mt-6 pt-4 border-t border-gray-100">
       <p class="text-xs font-medium text-amber-800 mb-2">

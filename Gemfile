@@ -63,6 +63,9 @@ gem "foreman", "~> 0.90", require: false
 gem "graphql", "~> 2.5"
 gem "graphiql-rails", group: :development
 
+gem "action_policy", "~> 0.7"
+gem "action_policy-graphql", "~> 0.5"
+
 gem "rspec-rails", "~> 7.1", :groups => [:development, :test]
 
 gem "dotenv-rails", "~> 3.1"

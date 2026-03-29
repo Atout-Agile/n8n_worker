@@ -1,0 +1,74 @@
+<% content_for :title, "Edit Role — #{@role.name}" %>
+
+<div class="mb-6">
+  <%= link_to "← Back to Roles", admin_roles_path,
+        class: "text-sm text-indigo-600 hover:text-indigo-800 transition-colors" %>
+</div>
+
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Edit permissions — <span class="text-indigo-600"><%= @role.name %></span></h1>
+  <p class="mt-1 text-sm text-gray-500"><%= @role.description %></p>
+</div>
+
+<% if @role.errors.any? %>
+  <div class="mb-4 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+    <ul class="list-disc list-inside space-y-1">
+      <% @role.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%= form_with url: admin_role_path(@role), method: :patch, class: "space-y-6" do |f| %>
+  <%# Group permissions by resource (the part before the colon) %>
+  <% grouped = @permissions.group_by { |p| p.name.split(":").first } %>
+
+  <% grouped.each do |resource, perms| %>
+    <div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
+        <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wider"><%= resource %></h2>
+      </div>
+      <div class="divide-y divide-gray-100">
+        <% perms.each do |permission| %>
+          <% checked   = @role.permissions.include?(permission) %>
+          <% disabled  = permission.deprecated? %>
+          <label class="flex items-start gap-4 px-5 py-4 <%= disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-50 transition-colors' %>">
+            <%= check_box_tag "role[permission_ids][]",
+                  permission.id,
+                  checked,
+                  disabled: disabled,
+                  id: "perm_#{permission.id}",
+                  class: "mt-0.5 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 disabled:cursor-not-allowed" %>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-gray-900"><%= permission.name %></span>
+                <% if disabled %>
+                  <span class="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-yellow-600/20">
+                    deprecated
+                  </span>
+                <% end %>
+              </div>
+              <% if permission.description.present? %>
+                <p class="mt-0.5 text-xs text-gray-500"><%= permission.description %></p>
+              <% end %>
+            </div>
+          </label>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @permissions.empty? %>
+    <div class="rounded-xl border border-gray-200 bg-white px-6 py-8 text-center text-sm text-gray-500">
+      No permissions available. Run <code class="font-mono bg-gray-100 px-1 rounded">rails permissions:sync</code> to populate them.
+    </div>
+  <% end %>
+
+  <div class="flex items-center justify-end gap-4 pt-2">
+    <%= link_to "Cancel", admin_roles_path,
+          class: "text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors" %>
+    <%= f.submit "Save permissions",
+          class: "inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors cursor-pointer" %>
+  </div>
+<% end %>

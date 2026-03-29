@@ -10,6 +10,11 @@ Rails.application.routes.draw do
     end
   end
   
+  # Admin routes
+  namespace :admin do
+    resources :roles, only: [:index, :edit, :update]
+  end
+
   # Authentication routes
   get '/login', to: 'sessions#new', as: 'login'
   post '/sessions', to: 'sessions#create'

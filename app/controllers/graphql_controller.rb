@@ -10,9 +10,23 @@ class GraphqlController < ApplicationController
     variables = prepare_variables(params[:variables])
     query = params[:query]
     operation_name = params[:operationName]
+
+    auth = authenticate_from_header
     context = {
-      current_user: current_user_from_token || current_user,
+      current_user: auth[:user] || current_user,
+      current_token: auth[:token],
+      operation_name: operation_name
     }
+
+    if auth[:token]
+      Rails.logger.info(JSON.generate(
+        event: "graphql.token_access",
+        token_id: auth[:token].id,
+        user_id: auth[:user].id,
+        operation: operation_name
+      ))
+    end
+
     result = N8nWorkerSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
   rescue StandardError => e
@@ -49,34 +63,33 @@ class GraphqlController < ApplicationController
     render json: { errors: [{ message: e.message, backtrace: e.backtrace }], data: {} }, status: 500
   end
 
-  # Authenticates the request from the Authorization header.
-  # Tries API token lookup first, then falls back to JWT session token.
+  # Resolves the authenticated user and API token from the Authorization header.
+  # Tries API token lookup first, then falls back to JWT.
   #
-  # @return [User, nil] The authenticated user, or nil if authentication fails
+  # @return [Hash] with keys :user [User, nil] and :token [ApiToken, nil]
   # @note Accepts "Authorization: Bearer <token>" header
-  # @note API tokens are raw hex tokens stored as SHA256 digests
-  # @note JWT tokens encode user_id in their payload
-  def current_user_from_token
+  # @note :token is only set when authentication was via API token (not JWT)
+  def authenticate_from_header
     auth_header = request.headers['Authorization']
-    return nil unless auth_header&.start_with?('Bearer ')
+    return { user: nil, token: nil } unless auth_header&.start_with?('Bearer ')
 
-    token = auth_header.split(' ', 2)[1]
-    return nil if token.blank?
+    raw_token = auth_header.split(' ', 2)[1]
+    return { user: nil, token: nil } if raw_token.blank?
 
-    # Try API token first (raw hex token stored as SHA256 digest)
-    api_token = ApiToken.find_by_token(token)
+    # Try API token first (raw hex stored as SHA256 digest)
+    api_token = ApiToken.find_by_token(raw_token)
     if api_token&.active?
       api_token.touch_last_used!
-      return api_token.user
+      return { user: api_token.user, token: api_token }
     end
 
-    # Fall back to JWT (used by web session and login mutation)
+    # Fall back to JWT
     begin
-      payload = JsonWebToken.decode(token)
-      User.find_by(id: payload[:user_id])
+      payload = JsonWebToken.decode(raw_token)
+      { user: User.find_by(id: payload[:user_id]), token: nil }
     rescue JWT::VerificationError, JWT::ExpiredSignature => e
       Rails.logger.warn("Invalid JWT token: #{e.message}")
-      nil
+      { user: nil, token: nil }
     end
   end
 end

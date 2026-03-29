@@ -11,6 +11,8 @@ RSpec.describe Role, type: :model do
 
   describe 'associations' do
     it { should have_many(:users).dependent(:restrict_with_error) }
+    it { should have_many(:role_permissions).dependent(:destroy) }
+    it { should have_many(:permissions).through(:role_permissions) }
   end
 
   describe 'factory' do

@@ -10,6 +10,11 @@
 
 # frozen_string_literal: true
 
+# Sync permissions from code declarations
+puts "Syncing permissions from code..."
+result = Permissions::SyncService.new.call
+puts "  #{result[:created]} created, #{result[:updated]} updated, #{result[:deprecated]} deprecated"
+
 # Nettoyer les données existantes
 puts "Nettoyage des données existantes..."
 ApiToken.destroy_all
@@ -19,34 +24,26 @@ Role.destroy_all
 # Create default roles (only if they don't exist yet)
 puts "Setting up default roles..."
 
-# Admin role
-unless Role.exists?(name: 'admin')
-  Role.create!(
-    name: 'admin',
-    description: 'Administrator with full access'
-  )
-  puts "- 'admin' role created"
-else
-  puts "- 'admin' role already exists"
+# Admin role — receives all non-deprecated permissions
+admin_role = Role.find_or_create_by!(name: 'admin') do |r|
+  r.description = 'Administrator with full access'
 end
+puts "- 'admin' role ready"
 
-# Standard user role
-unless Role.exists?(name: 'user')
-  Role.create!(
-    name: 'user',
-    description: 'Standard user'
-  )
-  puts "- 'user' role created"
-else
-  puts "- 'user' role already exists"
+all_permissions = Permission.where(deprecated: false)
+admin_role.permissions = all_permissions
+puts "  Assigned #{all_permissions.count} permission(s) to 'admin': #{all_permissions.pluck(:name).sort.join(', ')}"
+
+# Standard user role — no permissions by default (configured via admin UI)
+Role.find_or_create_by!(name: 'user') do |r|
+  r.description = 'Standard user'
 end
+puts "- 'user' role ready"
 
 # Create initial admin account (only if no admin exists)
 admin_email = 'admin@example.com'
 
 unless User.exists?(email: admin_email)
-  admin_role = Role.find_by(name: 'admin')
-  
   if admin_role
     User.create!(
       name: 'Administrator',

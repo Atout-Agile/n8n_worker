@@ -1,6 +1,12 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    action_policy (0.7.6)
+      ruby-next-core (>= 1.0)
+    action_policy-graphql (0.6.0)
+      action_policy (~> 0.7)
+      graphql (>= 1.9.3)
+      ruby-next-core (~> 1.0)
     actioncable (8.0.5)
       actionpack (= 8.0.5)
       activesupport (= 8.0.5)
@@ -381,6 +387,7 @@ GEM
       rubocop-minitest
       rubocop-performance
       rubocop-rails
+    ruby-next-core (1.2.0)
     ruby-progressbar (1.13.0)
     sass-embedded (1.85.0-aarch64-linux-gnu)
       google-protobuf (~> 4.29)
@@ -495,6 +502,8 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  action_policy (~> 0.7)
+  action_policy-graphql (~> 0.5)
   bcrypt (~> 3.1)
   bootsnap
   brakeman

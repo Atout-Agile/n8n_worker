@@ -32,9 +32,14 @@ module Api
       # @return [void]
       def new
         @token = current_user.api_tokens.build
+        @role_permissions = current_user.role.permissions.where(deprecated: false).order(:name)
       end
 
       # Creates a new API token.
+      #
+      # Assigns only permissions that belong to the current user's role and are
+      # not deprecated. Any out-of-scope permission id is silently ignored before
+      # the model-level validation runs.
       #
       # @return [void]
       def create
@@ -43,10 +48,15 @@ module Api
         @token.token_digest = Digest::SHA256.hexdigest(raw_token)
         @token.expires_at ||= 30.days.from_now
 
+        allowed_ids = current_user.role.permissions.where(deprecated: false).pluck(:id).to_set
+        selected_ids = (params.dig(:token, :permission_ids) || []).map(&:to_i).select { |id| allowed_ids.include?(id) }
+        @token.permission_ids = selected_ids
+
         if @token.save
           flash[:raw_token] = raw_token
           redirect_to api_v1_token_path(@token), notice: "API token created successfully"
         else
+          @role_permissions = current_user.role.permissions.where(deprecated: false).order(:name)
           render :new, status: :unprocessable_entity
         end
       end

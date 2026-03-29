@@ -42,6 +42,41 @@ RSpec.describe "Api::V1::Tokens", type: :request do
       expect(response).to have_http_status(:success)
       expect(response.body).to include("Create token")
     end
+
+    context "with role permissions" do
+      let!(:perm) { create(:permission, :users_read) }
+
+      before { role.permissions << perm }
+
+      it "displays only the role's non-deprecated permissions" do
+        login_as(user)
+        get "/api/v1/tokens/new"
+        expect(response.body).to include(perm.name)
+      end
+
+      it "does not display permissions from other roles" do
+        other_perm = create(:permission, :tokens_write)
+        login_as(user)
+        get "/api/v1/tokens/new"
+        expect(response.body).not_to include(other_perm.name)
+      end
+
+      it "does not display deprecated permissions" do
+        deprecated = create(:permission, name: "old:read", description: "Old", deprecated: true)
+        role.permissions << deprecated
+        login_as(user)
+        get "/api/v1/tokens/new"
+        expect(response.body).not_to include("old:read")
+      end
+    end
+
+    context "with no role permissions" do
+      it "shows a message that the role has no permissions" do
+        login_as(user)
+        get "/api/v1/tokens/new"
+        expect(response.body).to include("Your role has no permissions assigned")
+      end
+    end
   end
 
   describe "GET /api/v1/tokens/:id" do
@@ -52,6 +87,29 @@ RSpec.describe "Api::V1::Tokens", type: :request do
       get "/api/v1/tokens/#{api_token.id}"
       expect(response).to have_http_status(:success)
       expect(response.body).to include(api_token.name)
+    end
+
+    context "with assigned permissions" do
+      let!(:perm) { create(:permission, :users_read) }
+
+      before do
+        role.permissions << perm
+        api_token.permissions << perm
+      end
+
+      it "displays the token permissions" do
+        login_as(user)
+        get "/api/v1/tokens/#{api_token.id}"
+        expect(response.body).to include(perm.name)
+      end
+    end
+
+    context "with no assigned permissions" do
+      it "shows that no permissions are assigned" do
+        login_as(user)
+        get "/api/v1/tokens/#{api_token.id}"
+        expect(response.body).to include("No permissions assigned")
+      end
     end
   end
 
@@ -111,6 +169,43 @@ RSpec.describe "Api::V1::Tokens", type: :request do
         expect(flash[:raw_token]).to be_present
         expect(flash[:raw_token].length).to eq(64) # SecureRandom.hex(32)
         expect(token.token_digest).to eq(Digest::SHA256.hexdigest(flash[:raw_token]))
+      end
+    end
+
+    context "with valid permissions (subset of role)" do
+      let!(:perm_read)  { create(:permission, :users_read) }
+      let!(:perm_write) { create(:permission, :users_write) }
+
+      before { role.permissions << [perm_read, perm_write] }
+
+      it "creates a token with the selected permissions" do
+        login_as(user)
+        post "/api/v1/tokens", params: {
+          name: "Scoped Token",
+          token: { permission_ids: [perm_read.id] }
+        }
+        token = ApiToken.last
+        expect(token.permissions).to contain_exactly(perm_read)
+      end
+
+      it "creates a token with no permissions when none are selected" do
+        login_as(user)
+        post "/api/v1/tokens", params: { name: "Empty Token" }
+        expect(ApiToken.last.permissions).to be_empty
+      end
+    end
+
+    context "with a permission outside the user's role" do
+      let!(:other_perm) { create(:permission, :tokens_write) }
+
+      it "silently ignores the out-of-scope permission and creates the token without it" do
+        login_as(user)
+        post "/api/v1/tokens", params: {
+          name: "Injection Attempt",
+          token: { permission_ids: [other_perm.id] }
+        }
+        expect(response).to redirect_to(api_v1_token_path(ApiToken.last))
+        expect(ApiToken.last.permissions).to be_empty
       end
     end
 

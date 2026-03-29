@@ -311,3 +311,95 @@ Je veux mettre à jour `contributing.md` et `README.md` avec :
 - La liste des permissions disponibles et leur correspondance GraphQL
 - Le workflow d'ajout d'une nouvelle permission (déclarer `permission_required`, lancer `rails permissions:sync`)
 - Des exemples de requêtes GraphQL avec les headers d'authentification requis
+
+---
+
+## Backlog — corrections issues de la revue de code
+
+### [SÉCURITÉ — CRITIQUE] Timing attack sur la vérification de token [⌛]
+`app/models/api_token.rb` — méthode `find_by_token`
+La comparaison du digest SHA256 passe par une requête SQL ordinaire, exposant l'application à une attaque par timing.
+- Remplacer par `ActiveSupport::SecurityUtils.secure_compare` pour comparer les digests en temps constant
+- Ou migrer vers un stockage bcrypt (plus lourd, trade-off à évaluer)
+- Ajouter un test qui vérifie que deux tokens au digest différent ne produisent pas de timing observable
+
+### [SÉCURITÉ — MOYEN] CSRF non protégé sur les mutations GraphQL [⌛]
+`app/controllers/graphql_controller.rb` — `protect_from_forgery with: :null_session`
+La protection CSRF est désactivée globalement. Un utilisateur connecté via session web est vulnérable.
+- Appliquer `protect_from_forgery with: :exception` par défaut
+- Passer en `null_session` uniquement quand la requête porte un header `Authorization` (token API)
+
+### [BUG] Cascade incomplète lors de la réaffectation des permissions d'un rôle [⌛]
+`app/models/role.rb` — callback `after_remove` sur `has_many :permissions`
+Le callback `after_remove` se déclenche pour `role.permissions.delete(perm)` mais **pas** pour `role.permission_ids = [...]` (bulk assignment), ni pour `role.permissions = [...]`.
+Or `UpdateRolePermissions` utilise une réaffectation complète.
+- Vérifier le comportement exact de la mutation `updateRolePermissions`
+- Si la cascade ne se déclenche pas, implémenter une diff manuelle (permissions retirées = cascade)
+- Ajouter un test couvrant le cas `role.permissions = [other_perm]`
+
+### [BUG] Permissions dépréciées exposées dans le type GraphQL `RoleType` [⌛]
+`app/graphql/types/role_type.rb` — champ `permissions`
+Le champ retourne toutes les permissions du rôle y compris les dépréciées, contrairement à la query `permissions` qui les filtre.
+- Filtrer `deprecated: false` dans le resolver du champ, ou ajouter un scope par défaut
+- Ajouter un test qui vérifie qu'une permission dépréciée n'apparaît pas dans `role { permissions }`
+
+### [QUALITÉ] Filtrage des permissions dupliqué en 4 endroits [⌛]
+La logique `user.role.permissions.where(deprecated: false).pluck(:id).to_set` est copiée dans :
+- `mutations/create_api_token.rb`
+- `mutations/update_api_token_permissions.rb`
+- `controllers/api/v1/tokens_controller.rb`
+- `controllers/admin/roles_controller.rb`
+- Extraire dans une méthode `User#assignable_permissions` (ou scope `Permission.assignable_for(user)`)
+- Mettre à jour les 4 appelants
+
+### [QUALITÉ] `test_field` toujours présent dans `QueryType` [⌛]
+`app/graphql/types/query_type.rb`
+Le champ `test_field` avec son commentaire `# TODO: remove me` est exposé en production.
+- Supprimer le champ et son test associé
+
+### [QUALITÉ] `resolve_type` non implémenté dans le schema [⌛]
+`app/graphql/n8n_worker_schema.rb`
+Le `TODO: Implement this method` lève une `RequiredImplementationMissingError` si une Union ou Interface est ajoutée.
+- Soit implémenter, soit supprimer le stub et laisser graphql-ruby gérer le défaut
+- Documenter l'intention
+
+### [QUALITÉ] Magic number 30 jours dupliqué [⌛]
+La valeur `30` (durée d'expiration par défaut d'un token) est hardcodée dans :
+- `app/models/api_token.rb`
+- `app/graphql/mutations/create_api_token.rb`
+- `app/controllers/api/v1/tokens_controller.rb`
+- Extraire en `ApiToken::DEFAULT_EXPIRATION_DAYS = 30` et remplacer les 3 usages
+
+### [QUALITÉ] `define_singleton_method` sur une instance ActiveRecord [⌛]
+`app/models/api_token.rb` + `app/graphql/mutations/create_api_token.rb`
+Patcher dynamiquement une instance de modèle est fragile (cache, sérialisation, `dup`).
+- Remplacer par un objet valeur simple (ex: struct `TokenResult`) ou retourner le raw_token directement comme attribut du résultat de mutation
+
+### [PERFORMANCE] N+1 potentiel dans la vue admin roles [⌛]
+`app/views/admin/roles/index.html.erb`
+Le template appelle `role.permissions.order(:name)` sur chaque rôle. Même avec `includes(:permissions)`, le `.order` SQL force une requête par rôle.
+- Remplacer `role.permissions.order(:name)` par `role.permissions.sort_by(&:name)` dans la vue
+- Ou eager-loader les permissions triées depuis le controller
+
+### [TESTS] Cascade non couverte par réaffectation de permissions [⌛]
+`spec/models/role_permission_spec.rb`
+Seul `role.permissions.delete(perm)` est testé. Aucun test pour `role.permissions = [other_perm]`.
+- Ajouter un exemple couvrant la réaffectation complète
+- Vérifier que les tokens perdent bien les permissions retirées dans ce cas
+
+### [TESTS] Aucun test d'isolation entre utilisateurs dans le contrôleur REST tokens [⌛]
+`spec/requests/api/v1/tokens_spec.rb`
+Les actions `revoke`, `renew`, `destroy` ne vérifient pas qu'un utilisateur ne peut pas agir sur les tokens d'un autre.
+- Ajouter un test : user A ne peut pas révoquer/renouveler/supprimer le token de user B
+- Vérifier que la réponse est 404 (pas une fuite d'information)
+
+### [TESTS] Comportement de `verifyToken` avec un token expiré non spécifié [⌛]
+`spec/graphql/queries/verify_token_spec.rb`
+Un token expiré — retourne-t-il `null` ou une erreur ? Comportement non testé ni documenté.
+- Décider du comportement attendu
+- Ajouter un test explicite pour un token expiré
+
+### [MINEUR] Seed token créé sans aucune permission [⌛]
+`db/seeds.rb`
+Le `Seed Token` créé pour le compte admin n'a aucune permission assignée — il est inutilisable pour tester l'API directement.
+- Assigner toutes les permissions du rôle admin au seed token, ou documenter que c'est intentionnel

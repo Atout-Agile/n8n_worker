@@ -41,15 +41,37 @@ class ApiToken < ApplicationRecord
   #   @return [Integer] Foreign key to the user who owns this token
 
   # Associations
-  
+
   # @!attribute [r] user
   #   @return [User] The user who owns this token
   belongs_to :user
+  has_many :api_token_permissions, dependent: :destroy
+  has_many :permissions, through: :api_token_permissions
 
   # Validations
   validates :name, presence: true, uniqueness: { scope: :user_id, message: "You already have a token with this name" }
   validates :token_digest, presence: true
   validates :expires_at, presence: true
+  validate :permissions_within_role_scope
+
+  private
+
+  # Ensures all token permissions are a subset of the user's role permissions.
+  #
+  # @return [void]
+  # @api private
+  def permissions_within_role_scope
+    return if permissions.empty?
+    return unless user&.role
+
+    role_permission_ids = user.role.permissions.pluck(:id).to_set
+    invalid = permissions.reject { |p| role_permission_ids.include?(p.id) }
+    return if invalid.empty?
+
+    errors.add(:permissions, "contains permissions not available for your role: #{invalid.map(&:name).join(', ')}")
+  end
+
+  public
 
   # Scopes
   

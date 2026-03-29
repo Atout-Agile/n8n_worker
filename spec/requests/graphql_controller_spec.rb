@@ -18,7 +18,7 @@ RSpec.describe GraphqlController, type: :request do
     let(:login_mutation) do
       <<~GQL
         mutation Login($email: String!, $password: String!) {
-          login(input: { email: $email, password: $password }) {
+          login(email: $email, password: $password) {
             token
             user {
               id

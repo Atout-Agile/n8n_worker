@@ -16,6 +16,10 @@
       <div class="flex items-center gap-4">
         <%= link_to "API Tokens", api_v1_tokens_path,
               class: "text-sm text-gray-600 hover:text-gray-900 transition-colors" %>
+        <% if current_user&.role&.name == "admin" %>
+          <%= link_to "Admin", admin_roles_path,
+                class: "text-sm text-gray-600 hover:text-gray-900 transition-colors" %>
+        <% end %>
         <%= button_to "Sign out", logout_path, method: :delete,
               class: "text-sm font-medium text-red-600 hover:text-red-700 transition-colors bg-transparent border-0 cursor-pointer p-0" %>
       </div>

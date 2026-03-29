@@ -4,6 +4,22 @@ class N8nWorkerSchema < GraphQL::Schema
   mutation(Types::MutationType)
   query(Types::QueryType)
 
+  # Return a structured NOT_AUTHORIZED error when Action Policy denies access.
+  # Also emits a structured warning log with denial context.
+  rescue_from ActionPolicy::Unauthorized do |error, _obj, _args, ctx, _field|
+    Rails.logger.warn(JSON.generate(
+      event: "graphql.access_denied",
+      user_id: ctx[:current_user]&.id,
+      token_id: ctx[:current_token]&.id,
+      operation: ctx[:operation_name],
+      rule: error.rule
+    ))
+    raise GraphQL::ExecutionError.new(
+      "NOT_AUTHORIZED",
+      extensions: { code: "UNAUTHORIZED" }
+    )
+  end
+
   # For batch-loading (see https://graphql-ruby.org/dataloader/overview.html)
   use GraphQL::Dataloader
 

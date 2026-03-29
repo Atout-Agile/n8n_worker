@@ -4,11 +4,14 @@ require 'rails_helper'
 
 RSpec.describe Queries::VerifyToken do
   let(:role)      { create(:role) }
+  let!(:tokens_read_perm) { create(:permission, :tokens_read) }
   let(:user)      { create(:user, role: role) }
   let(:raw_token) { SecureRandom.hex(32) }
   let!(:api_token) do
     create(:api_token, user: user, token_digest: Digest::SHA256.hexdigest(raw_token))
   end
+
+  before { role.permissions << tokens_read_perm }
 
   let(:query) do
     <<~GQL
@@ -28,8 +31,12 @@ RSpec.describe Queries::VerifyToken do
     GQL
   end
 
-  def execute(token:)
-    N8nWorkerSchema.execute(query, variables: { token: token }).to_h
+  def execute(token:, context_user: user)
+    N8nWorkerSchema.execute(
+      query,
+      variables: { token: token },
+      context: { current_user: context_user, current_token: nil }
+    ).to_h
   end
 
   describe 'verifyToken query' do

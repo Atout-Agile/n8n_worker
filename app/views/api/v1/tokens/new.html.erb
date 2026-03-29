@@ -3,6 +3,7 @@ API Token Creation Form
 Used by Api::V1::TokensController#new action.
 
 @param token [ApiToken] The new token instance
+@param role_permissions [ActiveRecord::Relation<Permission>] Permissions available for selection
 %>
 <% content_for :title, "New API Token — N8N Worker" %>
 
@@ -26,7 +27,7 @@ Used by Api::V1::TokensController#new action.
   <% end %>
 
   <%= form_with url: api_v1_tokens_path, method: :post do |f| %>
-    <div class="space-y-5">
+    <div class="space-y-6">
       <div>
         <%= f.label :name, "Token name", class: "block text-sm font-medium text-gray-700 mb-1.5" %>
         <%= f.text_field :name, value: @token&.name,
@@ -42,6 +43,49 @@ Used by Api::V1::TokensController#new action.
               value: @token&.expires_at&.to_date,
               min: Date.tomorrow,
               class: "w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+      </div>
+
+      <div>
+        <p class="block text-sm font-medium text-gray-700 mb-1.5">Permissions</p>
+        <p class="text-xs text-gray-400 mb-3">
+          Select which permissions this token should have. Only permissions from your role are available.
+          A token with no permissions will be denied access to all protected operations.
+        </p>
+
+        <% if @role_permissions.any? %>
+          <% grouped = @role_permissions.group_by { |p| p.name.split(":").first } %>
+          <div class="space-y-3">
+            <% grouped.each do |resource, perms| %>
+              <div class="rounded-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                  <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider"><%= resource %></span>
+                </div>
+                <div class="divide-y divide-gray-100">
+                  <% perms.each do |permission| %>
+                    <% checked = @token&.permissions&.include?(permission) %>
+                    <label class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors">
+                      <%= check_box_tag "token[permission_ids][]",
+                            permission.id,
+                            checked,
+                            id: "perm_#{permission.id}",
+                            class: "mt-0.5 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
+                      <div>
+                        <span class="text-sm font-medium text-gray-900"><%= permission.name %></span>
+                        <% if permission.description.present? %>
+                          <p class="text-xs text-gray-500 mt-0.5"><%= permission.description %></p>
+                        <% end %>
+                      </div>
+                    </label>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-sm text-gray-400 italic">
+            Your role has no permissions assigned. Ask an administrator to configure your role first.
+          </p>
+        <% end %>
       </div>
 
       <%= f.submit "Create token",
