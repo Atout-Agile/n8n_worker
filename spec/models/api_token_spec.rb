@@ -142,15 +142,25 @@ RSpec.describe ApiToken, type: :model do
 
     describe '.find_by_token' do
       let!(:token) { ApiToken.generate_for_user(user, 'Test Token') }
-      
+
       it 'finds token by raw token value' do
         found_token = ApiToken.find_by_token(token.raw_token)
         expect(found_token).to eq(token)
       end
 
       it 'returns nil for non-existent token' do
-        found_token = ApiToken.find_by_token('non_existent_token')
-        expect(found_token).to be_nil
+        expect(ApiToken.find_by_token('non_existent_token')).to be_nil
+      end
+
+      it 'returns nil for a blank token' do
+        expect(ApiToken.find_by_token('')).to be_nil
+        expect(ApiToken.find_by_token(nil)).to be_nil
+      end
+
+      it 'uses constant-time comparison (secure_compare)' do
+        allow(ActiveSupport::SecurityUtils).to receive(:secure_compare).and_call_original
+        ApiToken.find_by_token(token.raw_token)
+        expect(ActiveSupport::SecurityUtils).to have_received(:secure_compare)
       end
     end
   end

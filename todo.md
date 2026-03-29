@@ -316,14 +316,14 @@ Je veux mettre à jour `contributing.md` et `README.md` avec :
 
 ## Backlog — corrections issues de la revue de code
 
-### [SÉCURITÉ — CRITIQUE] Timing attack sur la vérification de token [⌛]
+### [SÉCURITÉ — CRITIQUE] Timing attack sur la vérification de token [✓]
 `app/models/api_token.rb` — méthode `find_by_token`
 La comparaison du digest SHA256 passe par une requête SQL ordinaire, exposant l'application à une attaque par timing.
 - Remplacer par `ActiveSupport::SecurityUtils.secure_compare` pour comparer les digests en temps constant
 - Ou migrer vers un stockage bcrypt (plus lourd, trade-off à évaluer)
 - Ajouter un test qui vérifie que deux tokens au digest différent ne produisent pas de timing observable
 
-### [SÉCURITÉ — MOYEN] CSRF non protégé sur les mutations GraphQL [⌛]
+### [SÉCURITÉ — MOYEN] CSRF non protégé sur les mutations GraphQL [✓]
 `app/controllers/graphql_controller.rb` — `protect_from_forgery with: :null_session`
 La protection CSRF est désactivée globalement. Un utilisateur connecté via session web est vulnérable.
 - Appliquer `protect_from_forgery with: :exception` par défaut

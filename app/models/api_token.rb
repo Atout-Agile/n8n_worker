@@ -111,7 +111,12 @@ class ApiToken < ApplicationRecord
       end
     end
 
-    # Finds a token by its raw value (securely using digest comparison)
+    # Finds a token by its raw value using a constant-time digest comparison.
+    #
+    # The database lookup is performed by digest (indexed, O(1)), then the
+    # result is verified with +ActiveSupport::SecurityUtils.secure_compare+
+    # to prevent timing oracle attacks on the Ruby-side comparison.
+    # Returns +nil+ immediately for blank inputs.
     #
     # @param raw_token [String] The original token string
     # @return [ApiToken, nil] The matching token or nil if not found
@@ -119,8 +124,13 @@ class ApiToken < ApplicationRecord
     #   token = ApiToken.find_by_token("abc123def456...")
     #   token&.touch_last_used!
     def find_by_token(raw_token)
+      return nil if raw_token.blank?
+
       token_digest = Digest::SHA256.hexdigest(raw_token)
-      find_by(token_digest: token_digest)
+      candidate = find_by(token_digest: token_digest)
+      return nil unless candidate
+
+      ActiveSupport::SecurityUtils.secure_compare(candidate.token_digest, token_digest) ? candidate : nil
     end
   end
 

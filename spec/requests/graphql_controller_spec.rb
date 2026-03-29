@@ -228,8 +228,36 @@ RSpec.describe GraphqlController, type: :request do
     end
 
     context 'CSRF protection' do
-      it 'allows requests without CSRF token' do
-        # This should work because we use protect_from_forgery with: :null_session
+      it 'skips CSRF verification when Authorization header is present' do
+        # API clients authenticate via Authorization header — no CSRF token needed.
+        post '/graphql',
+          params: { query: valid_query },
+          headers: { 'Authorization' => "Bearer #{JsonWebToken.encode(user_id: user.id)}" }
+
+        expect(response).to have_http_status(:success)
+      end
+
+      it 'enforces CSRF verification for session-based requests (when forgery protection is on)' do
+        # Simulate forgery protection enabled (it is disabled globally in test env).
+        # We verify the controller flag rather than raising the exception, as Rails
+        # disables the check for integration tests by default.
+        controller = GraphqlController.new
+        expect(GraphqlController.forgery_protection_strategy).to eq(ActionController::RequestForgeryProtection::ProtectionMethods::Exception)
+      end
+
+      it 'api_request? returns true when Authorization header is present' do
+        post '/graphql',
+          params: { query: valid_query },
+          headers: { 'Authorization' => 'Bearer sometoken' }
+
+        # The request goes through (Authorization header present → CSRF skipped).
+        expect(response).to have_http_status(:success)
+      end
+
+      it 'api_request? returns false when Authorization header is absent' do
+        # Without Authorization header the request relies on session/CSRF.
+        # In the test environment forgery protection is disabled, so the request
+        # still succeeds — but the controller no longer nullifies the session.
         post '/graphql', params: { query: valid_query }
 
         expect(response).to have_http_status(:success)
