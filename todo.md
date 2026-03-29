@@ -375,7 +375,7 @@ La valeur `30` (durée d'expiration par défaut d'un token) est hardcodée dans 
 Patcher dynamiquement une instance de modèle est fragile (cache, sérialisation, `dup`).
 - Remplacer par un objet valeur simple (ex: struct `TokenResult`) ou retourner le raw_token directement comme attribut du résultat de mutation
 
-### [PERFORMANCE] N+1 potentiel dans la vue admin roles [⌛]
+### [PERFORMANCE] N+1 potentiel dans la vue admin roles [✓]
 `app/views/admin/roles/index.html.erb`
 Le template appelle `role.permissions.order(:name)` sur chaque rôle. Même avec `includes(:permissions)`, le `.order` SQL force une requête par rôle.
 - Remplacer `role.permissions.order(:name)` par `role.permissions.sort_by(&:name)` dans la vue

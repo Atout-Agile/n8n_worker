@@ -32,7 +32,7 @@ module Api
       # @return [void]
       def new
         @token = current_user.api_tokens.build
-        @role_permissions = current_user.assignable_permissions.order(:name)
+        @role_permissions = current_user.assignable_permissions.sort_by(&:name)
       end
 
       # Creates a new API token.
@@ -48,7 +48,7 @@ module Api
         @token.token_digest = Digest::SHA256.hexdigest(raw_token)
         @token.expires_at ||= ApiToken::DEFAULT_EXPIRATION_DAYS.days.from_now
 
-        allowed_ids = current_user.assignable_permissions.pluck(:id).to_set
+        allowed_ids = current_user.assignable_permissions.map(&:id).to_set
         selected_ids = (params.dig(:token, :permission_ids) || []).map(&:to_i).select { |id| allowed_ids.include?(id) }
         @token.permission_ids = selected_ids
 
@@ -56,7 +56,7 @@ module Api
           flash[:raw_token] = raw_token
           redirect_to api_v1_token_path(@token), notice: "API token created successfully"
         else
-          @role_permissions = current_user.assignable_permissions.order(:name)
+          @role_permissions = current_user.assignable_permissions.sort_by(&:name)
           render :new, status: :unprocessable_entity
         end
       end

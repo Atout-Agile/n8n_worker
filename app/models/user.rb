@@ -11,7 +11,7 @@ class User < ApplicationRecord
   #
   # @return [ActiveRecord::Relation<Permission>]
   def assignable_permissions
-    role.permissions.where(deprecated: false)
+    role.permissions.reject(&:deprecated)
   end
 
   validates :name, presence: true

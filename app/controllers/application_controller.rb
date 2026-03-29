@@ -10,7 +10,7 @@ class ApplicationController < ActionController::Base
       return nil unless token
 
       payload = decode_token(token)
-      User.find_by(id: payload[:user_id])
+      User.includes(role: :permissions).find_by(id: payload[:user_id])
     rescue StandardError => e
       Rails.logger.error("Error fetching current user: #{e.message}")
       nil

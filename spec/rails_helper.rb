@@ -53,7 +53,17 @@ begin
 rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
+# Bullet — N+1 detection in tests
+require 'bullet'
+Bullet.enable                      = true
+Bullet.raise                       = true
+Bullet.n_plus_one_query_enable     = true
+Bullet.unused_eager_loading_enable = false  # disabled: causes false positives when an association is preloaded but not used in a specific test
+
 RSpec.configure do |config|
+  config.before(:each) { Bullet.start_request }
+  config.after(:each)  { Bullet.perform_out_of_channel_notifications if Bullet.notification?
+                         Bullet.end_request }
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')

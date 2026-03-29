@@ -9,7 +9,7 @@ module Types
           description: "Non-deprecated permissions assigned to this role"
 
     def permissions
-      object.permissions.where(deprecated: false).order(:name)
+      object.permissions.reject(&:deprecated).sort_by(&:name)
     end
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
