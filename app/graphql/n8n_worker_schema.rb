@@ -33,10 +33,18 @@ class N8nWorkerSchema < GraphQL::Schema
   end
 
   # Union and Interface Resolution
+  # Maps a Ruby model instance to its corresponding GraphQL type.
+  # Called by graphql-ruby when resolving abstract types (Union/Interface),
+  # e.g. when using the Relay +node+ or +nodes+ queries.
   def self.resolve_type(abstract_type, obj, ctx)
-    # TODO: Implement this method
-    # to return the correct GraphQL object type for `obj`
-    raise(GraphQL::RequiredImplementationMissingError)
+    case obj
+    when User       then Types::UserType
+    when ApiToken   then Types::ApiTokenType
+    when Role       then Types::RoleType
+    when Permission then Types::PermissionType
+    else
+      raise GraphQL::RequiredImplementationMissingError, "No GraphQL type registered for #{obj.class.name}"
+    end
   end
 
   # Limit the size of incoming queries:

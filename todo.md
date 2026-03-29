@@ -357,7 +357,7 @@ La logique `user.role.permissions.where(deprecated: false).pluck(:id).to_set` es
 Le champ `test_field` avec son commentaire `# TODO: remove me` est exposé en production.
 - Supprimer le champ et son test associé
 
-### [QUALITÉ] `resolve_type` non implémenté dans le schema [⌛]
+### [QUALITÉ] `resolve_type` non implémenté dans le schema [✓]
 `app/graphql/n8n_worker_schema.rb`
 Le `TODO: Implement this method` lève une `RequiredImplementationMissingError` si une Union ou Interface est ajoutée.
 - Soit implémenter, soit supprimer le stub et laisser graphql-ruby gérer le défaut
