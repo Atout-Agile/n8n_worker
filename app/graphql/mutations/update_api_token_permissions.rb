@@ -50,7 +50,7 @@ module Mutations
       api_token = current_user.api_tokens.find_by(id: id)
       return { api_token: nil, errors: ["Token not found"] } unless api_token
 
-      allowed_ids = current_user.role.permissions.where(deprecated: false).pluck(:id).to_set
+      allowed_ids = current_user.assignable_permissions.pluck(:id).to_set
       api_token.permission_ids = permission_ids.map(&:to_i).select { |pid| allowed_ids.include?(pid) }
 
       if api_token.save

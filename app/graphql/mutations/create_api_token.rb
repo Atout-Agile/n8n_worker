@@ -69,7 +69,7 @@ module Mutations
         expires_at: expires_in_days.days.from_now
       )
 
-      allowed_ids = current_user.role.permissions.where(deprecated: false).pluck(:id).to_set
+      allowed_ids = current_user.assignable_permissions.pluck(:id).to_set
       api_token.permission_ids = permission_ids.map(&:to_i).select { |id| allowed_ids.include?(id) }
 
       if api_token.save

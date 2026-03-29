@@ -343,7 +343,7 @@ Le champ retourne toutes les permissions du rôle y compris les dépréciées, c
 - Filtrer `deprecated: false` dans le resolver du champ, ou ajouter un scope par défaut
 - Ajouter un test qui vérifie qu'une permission dépréciée n'apparaît pas dans `role { permissions }`
 
-### [QUALITÉ] Filtrage des permissions dupliqué en 4 endroits [⌛]
+### [QUALITÉ] Filtrage des permissions dupliqué en 4 endroits [✓]
 La logique `user.role.permissions.where(deprecated: false).pluck(:id).to_set` est copiée dans :
 - `mutations/create_api_token.rb`
 - `mutations/update_api_token_permissions.rb`
