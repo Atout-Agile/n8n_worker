@@ -72,10 +72,12 @@ if admin
     token_digest: Digest::SHA256.hexdigest(raw_token),
     expires_at: 3.days.from_now
   )
+  token.permissions = all_permissions
   puts "Admin API token created:"
-  puts "- Name:    #{token.name}"
-  puts "- Token:   #{raw_token}"
-  puts "- Expires: #{token.expires_at.strftime('%Y-%m-%d')}"
+  puts "- Name:        #{token.name}"
+  puts "- Token:       #{raw_token}"
+  puts "- Expires:     #{token.expires_at.strftime('%Y-%m-%d')}"
+  puts "- Permissions: #{all_permissions.pluck(:name).sort.join(', ')}"
   puts "IMPORTANT: This token is only shown once — save it now!"
 else
   puts "ERROR: Could not create API token — admin account not found."
