@@ -337,7 +337,7 @@ Or `UpdateRolePermissions` utilise une réaffectation complète.
 - Si la cascade ne se déclenche pas, implémenter une diff manuelle (permissions retirées = cascade)
 - Ajouter un test couvrant le cas `role.permissions = [other_perm]`
 
-### [BUG] Permissions dépréciées exposées dans le type GraphQL `RoleType` [⌛]
+### [BUG] Permissions dépréciées exposées dans le type GraphQL `RoleType` [✓]
 `app/graphql/types/role_type.rb` — champ `permissions`
 Le champ retourne toutes les permissions du rôle y compris les dépréciées, contrairement à la query `permissions` qui les filtre.
 - Filtrer `deprecated: false` dans le resolver du champ, ou ajouter un scope par défaut

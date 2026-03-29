@@ -6,7 +6,11 @@ module Types
     field :name, String, null: false
     field :description, String, null: false
     field :permissions, [Types::PermissionType], null: false,
-          description: "Permissions assigned to this role"
+          description: "Non-deprecated permissions assigned to this role"
+
+    def permissions
+      object.permissions.where(deprecated: false).order(:name)
+    end
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
   end
