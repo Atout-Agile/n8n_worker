@@ -21,6 +21,18 @@ RSpec.describe "roles and permissions queries" do
       expect(names).to include(role.name)
     end
 
+    it "excludes deprecated permissions from role.permissions" do
+      deprecated = create(:permission, name: "old:write", description: "Old", deprecated: true)
+      role.permissions << deprecated
+
+      result = gql("query { roles { name permissions { name } } }")
+      role_data = result["data"]["roles"].find { |r| r["name"] == role.name }
+      perm_names = role_data["permissions"].map { |p| p["name"] }
+
+      expect(perm_names).not_to include("old:write")
+      expect(perm_names).to include("roles:read")
+    end
+
     it "returns NOT_AUTHORIZED without roles:read" do
       unprivileged = create(:user, role: create(:role))
       result = gql("query { roles { id } }", current_user: unprivileged)

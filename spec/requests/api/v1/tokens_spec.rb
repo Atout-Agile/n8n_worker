@@ -6,12 +6,9 @@ RSpec.describe "Api::V1::Tokens", type: :request do
   let(:role) { create(:role) }
   let(:user) { create(:user, role: role) }
   
-  # Helper pour simuler la connexion utilisateur
+  # Authenticates via the real session flow so current_user runs with its includes.
   def login_as(user)
-    # Mock plus agressif pour s'assurer que ça fonctionne
-    allow_any_instance_of(Api::V1::TokensController).to receive(:authenticate_user!).and_return(true)
-    allow_any_instance_of(Api::V1::TokensController).to receive(:current_user).and_return(user)
-    allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(user)
+    post sessions_path, params: { email: user.email, password: 'password123' }
   end
 
   describe "GET /api/v1/tokens" do
@@ -271,6 +268,14 @@ RSpec.describe "Api::V1::Tokens", type: :request do
       login_as(user)
       patch "/api/v1/tokens/#{api_token.id}/renew"
       expect(api_token.reload.active?).to be true
+    end
+
+    it "does not allow renewing another user's token" do
+      other_user = create(:user, role: role)
+      other_token = create(:api_token, user: other_user)
+      login_as(user)
+      patch "/api/v1/tokens/#{other_token.id}/renew"
+      expect(response).to have_http_status(:not_found)
     end
   end
 

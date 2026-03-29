@@ -22,7 +22,14 @@
 # @since 2025-07-19
 class ApiToken < ApplicationRecord
   include ActionView::Helpers::DateHelper
-  
+
+  DEFAULT_EXPIRATION_DAYS = 30
+
+  # Transient attribute holding the raw (unhashed) token value.
+  # Only populated immediately after token creation — never persisted.
+  # Returns +nil+ on any subsequent load from the database.
+  attr_accessor :raw_token
+
   # @!attribute [r] id
   #   @return [Integer] Primary key
   # @!attribute [rw] name  
@@ -92,7 +99,7 @@ class ApiToken < ApplicationRecord
     # @example
     #   token = ApiToken.generate_for_user(user, "My App Token", expires_in_days: 60)
     #   puts token.raw_token if token.persisted?
-    def generate_for_user(user, name, expires_in_days: 30)
+    def generate_for_user(user, name, expires_in_days: DEFAULT_EXPIRATION_DAYS)
       raw_token = SecureRandom.hex(32)
       
       api_token = new(
@@ -103,12 +110,9 @@ class ApiToken < ApplicationRecord
       )
       
       if api_token.save
-        # Add the raw token to the object for return
-        api_token.define_singleton_method(:raw_token) { raw_token }
-        api_token
-      else
-        api_token
+        api_token.raw_token = raw_token
       end
+      api_token
     end
 
     # Finds a token by its raw value using a constant-time digest comparison.
@@ -177,6 +181,6 @@ class ApiToken < ApplicationRecord
   # @return [void]
   # @api private
   def set_default_expiration
-    self.expires_at = 30.days.from_now
+    self.expires_at = DEFAULT_EXPIRATION_DAYS.days.from_now
   end
 end

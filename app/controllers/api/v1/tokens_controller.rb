@@ -32,7 +32,7 @@ module Api
       # @return [void]
       def new
         @token = current_user.api_tokens.build
-        @role_permissions = current_user.role.permissions.where(deprecated: false).order(:name)
+        @role_permissions = current_user.assignable_permissions.sort_by(&:name)
       end
 
       # Creates a new API token.
@@ -46,9 +46,9 @@ module Api
         @token = current_user.api_tokens.build(token_params)
         raw_token = SecureRandom.hex(32)
         @token.token_digest = Digest::SHA256.hexdigest(raw_token)
-        @token.expires_at ||= 30.days.from_now
+        @token.expires_at ||= ApiToken::DEFAULT_EXPIRATION_DAYS.days.from_now
 
-        allowed_ids = current_user.role.permissions.where(deprecated: false).pluck(:id).to_set
+        allowed_ids = current_user.assignable_permissions.map(&:id).to_set
         selected_ids = (params.dig(:token, :permission_ids) || []).map(&:to_i).select { |id| allowed_ids.include?(id) }
         @token.permission_ids = selected_ids
 
@@ -56,7 +56,7 @@ module Api
           flash[:raw_token] = raw_token
           redirect_to api_v1_token_path(@token), notice: "API token created successfully"
         else
-          @role_permissions = current_user.role.permissions.where(deprecated: false).order(:name)
+          @role_permissions = current_user.assignable_permissions.sort_by(&:name)
           render :new, status: :unprocessable_entity
         end
       end
@@ -74,7 +74,7 @@ module Api
       #
       # @return [void]
       def renew
-        @token.update!(expires_at: 30.days.from_now)
+        @token.update!(expires_at: ApiToken::DEFAULT_EXPIRATION_DAYS.days.from_now)
         redirect_to api_v1_tokens_path, notice: "Token \"#{@token.name}\" renewed until #{@token.expires_at.strftime('%b %d, %Y')}."
       end
 

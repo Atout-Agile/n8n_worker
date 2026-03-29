@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.2] — 2026-03-29
+
+### Performance — N+1 elimination
+
+Installed Bullet gem (v8.0) for automatic N+1 detection in development and test:
+
+- **`app/graphql/types/role_type.rb`** — replaced `permissions.where(deprecated: false).order(:name)` SQL query with Ruby-level `reject(&:deprecated).sort_by(&:name)` on the preloaded association, eliminating one query per role in any GraphQL request returning role lists
+- **`app/views/admin/roles/index.html.erb`** — same fix for the admin roles view, which iterated roles and sorted permissions with a SQL query per row
+- **`app/controllers/application_controller.rb`** — upgraded `User.includes(:role)` to `User.includes(role: :permissions)` so every authenticated request preloads the full permission set in a single query
+- **`app/models/user.rb`** — changed `assignable_permissions` from `role.permissions.where(deprecated: false)` (AR relation, always fires SQL) to `role.permissions.reject(&:deprecated)` (Ruby filter on preloaded array)
+- **`app/controllers/api/v1/tokens_controller.rb`** and **GraphQL mutations** — updated `assignable_permissions` callers from `.pluck(:id)` / `.order(:name)` to `.map(&:id)` / `.sort_by(&:name)` to use in-memory data
+- **`spec/requests/api/v1/tokens_spec.rb`** — replaced `allow_any_instance_of` current_user mock with real session authentication via `POST /sessions`, so request specs exercise the genuine auth path (and Bullet can verify no SQL is fired within the request)
+
+Bullet is configured to raise in test (`Bullet.raise = true`) so any regression will cause an immediate test failure. N+1 detection for unused eager loading is disabled (`unused_eager_loading_enable = false`) to avoid false positives when a preloaded association is not accessed in every test path.
+
+---
+
 ## [0.2.1] — 2026-03-29
 
 ### Security fixes

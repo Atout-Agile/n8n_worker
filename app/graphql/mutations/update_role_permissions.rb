@@ -51,13 +51,9 @@ module Mutations
       return { role: nil, errors: ["Role not found"] } unless role
 
       active_ids = Permission.where(id: permission_ids, deprecated: false).pluck(:id)
-      role.permission_ids = active_ids
+      role.assign_permissions(active_ids)
 
-      if role.save
-        { role: role, errors: [] }
-      else
-        { role: nil, errors: role.errors.full_messages }
-      end
+      { role: role.reload, errors: [] }
     end
   end
 end

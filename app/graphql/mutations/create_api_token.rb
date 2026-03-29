@@ -37,8 +37,9 @@ module Mutations
 
     # @!attribute [r] expires_in_days
     #   @return [Integer] Number of days until token expiration
-    argument :expires_in_days, Integer, required: false, default_value: 30,
-             description: "Number of days until expiration (default: 30)"
+    argument :expires_in_days, Integer, required: false,
+             default_value: ApiToken::DEFAULT_EXPIRATION_DAYS,
+             description: "Number of days until expiration (default: #{ApiToken::DEFAULT_EXPIRATION_DAYS})"
 
     # @!attribute [r] permission_ids
     #   @return [Array<ID>] Permissions to grant (must be a subset of the user's role permissions)
@@ -69,11 +70,11 @@ module Mutations
         expires_at: expires_in_days.days.from_now
       )
 
-      allowed_ids = current_user.role.permissions.where(deprecated: false).pluck(:id).to_set
+      allowed_ids = current_user.assignable_permissions.map(&:id).to_set
       api_token.permission_ids = permission_ids.map(&:to_i).select { |id| allowed_ids.include?(id) }
 
       if api_token.save
-        api_token.define_singleton_method(:token) { raw_token }
+        api_token.raw_token = raw_token
         { api_token: api_token, errors: [] }
       else
         { api_token: nil, errors: api_token.errors.full_messages }

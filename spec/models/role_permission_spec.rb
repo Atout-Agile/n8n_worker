@@ -14,6 +14,37 @@ RSpec.describe RolePermission, type: :model do
     end
   end
 
+  describe 'Role#assign_permissions' do
+    let!(:perm_a) { create(:permission, :users_read) }
+    let!(:perm_b) { create(:permission, :tokens_read) }
+    let(:role)    { create(:role).tap { |r| r.permissions << [perm_a, perm_b] } }
+    let(:user)    { create(:user, role: role) }
+    let!(:token)  { create(:api_token, user: user, permissions: [perm_a, perm_b]) }
+
+    it 'replaces the permission set and cascades removals to tokens' do
+      role.assign_permissions([perm_b.id])
+
+      expect(role.reload.permissions).to contain_exactly(perm_b)
+      expect(token.reload.permissions).to contain_exactly(perm_b)
+    end
+
+    it 'adds new permissions without touching tokens' do
+      perm_c = create(:permission, :users_write)
+      role.assign_permissions([perm_a.id, perm_b.id, perm_c.id])
+
+      expect(role.reload.permissions).to include(perm_c)
+      # token keeps its existing permissions untouched
+      expect(token.reload.permissions).to contain_exactly(perm_a, perm_b)
+    end
+
+    it 'clears all permissions when called with an empty list' do
+      role.assign_permissions([])
+
+      expect(role.reload.permissions).to be_empty
+      expect(token.reload.permissions).to be_empty
+    end
+  end
+
   describe 'cascade: removing a permission from a role revokes it from tokens' do
     let!(:perm)  { create(:permission, :users_read) }
     let(:role)   { create(:role).tap { |r| r.permissions << perm } }
