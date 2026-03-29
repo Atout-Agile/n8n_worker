@@ -370,7 +370,7 @@ La valeur `30` (durée d'expiration par défaut d'un token) est hardcodée dans 
 - `app/controllers/api/v1/tokens_controller.rb`
 - Extraire en `ApiToken::DEFAULT_EXPIRATION_DAYS = 30` et remplacer les 3 usages
 
-### [QUALITÉ] `define_singleton_method` sur une instance ActiveRecord [⌛]
+### [QUALITÉ] `define_singleton_method` sur une instance ActiveRecord [✓]
 `app/models/api_token.rb` + `app/graphql/mutations/create_api_token.rb`
 Patcher dynamiquement une instance de modèle est fragile (cache, sérialisation, `dup`).
 - Remplacer par un objet valeur simple (ex: struct `TokenResult`) ou retourner le raw_token directement comme attribut du résultat de mutation

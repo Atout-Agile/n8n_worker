@@ -49,8 +49,12 @@ module Types
     # @return [String] The descriptive name
     field :name, String, null: false
     
-    # @return [String, nil] The JWT token (only visible during creation)
-    field :token, String, null: true, description: "The JWT token (only visible during creation)"
+    # @return [String, nil] Raw token value — only populated immediately after creation, nil otherwise
+    field :token, String, null: true, description: "Raw token value (only present in the creation response)"
+
+    def token
+      object.raw_token
+    end
     
     # @return [GraphQL::Types::ISO8601DateTime] Token expiration timestamp
     field :expires_at, GraphQL::Types::ISO8601DateTime, null: false

@@ -25,6 +25,11 @@ class ApiToken < ApplicationRecord
 
   DEFAULT_EXPIRATION_DAYS = 30
 
+  # Transient attribute holding the raw (unhashed) token value.
+  # Only populated immediately after token creation — never persisted.
+  # Returns +nil+ on any subsequent load from the database.
+  attr_accessor :raw_token
+
   # @!attribute [r] id
   #   @return [Integer] Primary key
   # @!attribute [rw] name  
@@ -105,12 +110,9 @@ class ApiToken < ApplicationRecord
       )
       
       if api_token.save
-        # Add the raw token to the object for return
-        api_token.define_singleton_method(:raw_token) { raw_token }
-        api_token
-      else
-        api_token
+        api_token.raw_token = raw_token
       end
+      api_token
     end
 
     # Finds a token by its raw value using a constant-time digest comparison.

@@ -74,7 +74,7 @@ module Mutations
       api_token.permission_ids = permission_ids.map(&:to_i).select { |id| allowed_ids.include?(id) }
 
       if api_token.save
-        api_token.define_singleton_method(:token) { raw_token }
+        api_token.raw_token = raw_token
         { api_token: api_token, errors: [] }
       else
         { api_token: nil, errors: api_token.errors.full_messages }
