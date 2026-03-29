@@ -64,7 +64,13 @@ cp .env.example .env
 ```bash
 rails db:create
 rails db:migrate
+rails db:seed          # creates admin account and syncs permissions
 ```
+
+The seed creates:
+- Account: `admin@example.com` / `changeme123` (change after first login)
+- Roles: `admin`, `user`
+- All permissions declared in the codebase (via `rails permissions:sync`)
 
 ## Tests
 
@@ -145,31 +151,92 @@ Si vous rencontrez des erreurs :
    RAILS_ENV=test rails db:environment:set RAILS_ENV=test
    ```
 
-## API GraphQL
+## GraphQL API
 
-### Authentification
-L'API utilise JWT pour l'authentification. Pour obtenir un token :
+All requests go to `POST /graphql`.
+
+### Authentication
+
+#### Step 1 — Obtain a JWT via the login mutation (public, no token required)
 
 ```graphql
 mutation {
-  login(input: {
-    email: "user@example.com",
-    password: "password"
-  }) {
+  login(email: "user@example.com", password: "password") {
     token
-    user {
-      id
-      email
-    }
+    user { id email username }
     errors
   }
 }
 ```
 
-### Utilisation
-Inclure le token dans le header Authorization :
+#### Step 2 — Include the token in every subsequent request
+
 ```bash
-Authorization: Bearer <votre_token>
+Authorization: Bearer <token>
+```
+
+### Permissions
+
+Protected operations require a permission. The table below lists all operations and their required permission.
+
+| Operation | Type | Required permission |
+|---|---|---|
+| `login` | mutation | _(public)_ |
+| `user` | query | `users:read` |
+| `users` | query | `users:read` |
+| `updateUser` | mutation | `users:write` |
+| `apiTokens` | query | `tokens:read` |
+| `verifyToken` | query | `tokens:read` |
+| `createApiToken(name, expiresInDays?, permissionIds?)` | mutation | `tokens:write` |
+| `revokeApiToken` | mutation | `tokens:write` |
+| `updateApiTokenPermissions(id, permissionIds)` | mutation | `tokens:write` |
+| `roles` | query | `roles:read` |
+| `permissions` | query | `roles:read` |
+| `updateRolePermissions(roleId, permissionIds)` | mutation | `roles:write` |
+
+When a request is denied the API returns:
+```json
+{ "errors": [{ "message": "NOT_AUTHORIZED", "extensions": { "code": "UNAUTHORIZED" } }] }
+```
+
+#### JWT authentication — permissions come from the user's role
+
+Assign permissions to a role via the admin interface at `/admin/roles`, via GraphQL (`updateRolePermissions`), or via the console:
+```bash
+rails permissions:sync          # populate Permission records from code
+# then assign via /admin/roles or updateRolePermissions mutation
+```
+
+#### API token authentication — permissions are scoped per token
+
+Select permissions when creating a token (web form at `/api/v1/tokens/new`, or via GraphQL with `createApiToken(permissionIds: [...])`) and update them later with `updateApiTokenPermissions`. A token with no permissions cannot access any protected operation.
+
+To authenticate with an API token use the same `Authorization: Bearer` header.
+
+### Example requests
+
+**List users (requires `users:read`)**
+```bash
+curl -X POST http://localhost:3000/graphql \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"query { users { id email username } }"}'
+```
+
+**Create an API token (requires `tokens:write`)**
+```bash
+curl -X POST http://localhost:3000/graphql \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"mutation { createApiToken(name: \"CI\") { apiToken { id name } errors } }"}'
+```
+
+**Verify an API token (requires `tokens:read`)**
+```bash
+curl -X POST http://localhost:3000/graphql \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"query { verifyToken(token: \"<raw_token>\") { id name } }"}'
 ```
 
 ## Déploiement

@@ -30,7 +30,19 @@ module Types
 
     field :user, resolver: Queries::User
 
+    # @since 2026-03-28
+    field :users, resolver: Queries::Users
+
     # @since 2026-03-23
     field :verify_token, resolver: Queries::VerifyToken
+
+    # @since 2026-03-28
+    field :api_tokens, resolver: Queries::ApiTokens
+
+    # @since 2026-03-29
+    field :roles, resolver: Queries::Roles
+
+    # @since 2026-03-29
+    field :permissions, resolver: Queries::Permissions
   end
 end

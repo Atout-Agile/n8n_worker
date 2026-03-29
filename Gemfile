@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.0.1"
+gem "rails", "~> 8.0.2"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use sqlite3 as the database for Active Record
@@ -57,8 +57,14 @@ group :development do
 end
 
 
-gem "graphql", "~> 2.4"
+gem "tailwindcss-rails", "~> 3.3"
+gem "foreman", "~> 0.90", require: false
+
+gem "graphql", "~> 2.5"
 gem "graphiql-rails", group: :development
+
+gem "action_policy", "~> 0.7"
+gem "action_policy-graphql", "~> 0.5"
 
 gem "rspec-rails", "~> 7.1", :groups => [:development, :test]
 

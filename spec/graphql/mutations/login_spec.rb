@@ -8,7 +8,7 @@ RSpec.describe Mutations::Login, type: :request do
   let(:query) do
     <<~GQL
       mutation Login($email: String!, $password: String!) {
-        login(input: { email: $email, password: $password }) {
+        login(email: $email, password: $password) {
           token
           user {
             id

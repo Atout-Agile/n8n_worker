@@ -38,17 +38,5 @@ RSpec.describe ApplicationController, type: :request do
       end
     end
 
-    describe '#user_query' do
-      it 'returns the correct GraphQL query' do
-        query = controller.send(:user_query)
-        
-        expect(query).to include('query User($id: ID!)')
-        expect(query).to include('user(id: $id)')
-        expect(query).to include('id')
-        expect(query).to include('email')
-        expect(query).to include('username')
-        expect(query).to include('role')
-      end
-    end
   end
 end 

@@ -12,7 +12,7 @@ RSpec.describe SessionsController, type: :request do
         get login_path
         
         expect(response).to have_http_status(:success)
-        expect(response.body).to include('Login')
+        expect(response.body).to include('Sign in')
         expect(response.body).to include('Email')
         expect(response.body).to include('Password')
       end

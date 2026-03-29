@@ -1,91 +1,99 @@
 # frozen_string_literal: true
 
-# API controller for managing user API tokens via REST endpoints.
-# Provides both web interface and JSON API for creating and viewing tokens.
+# Controller for managing API tokens via the web interface.
 # All actions require user authentication.
-#
-# @example POST /api/v1/tokens
-#   curl -X POST "/api/v1/tokens" \
-#        -H "Content-Type: application/json" \
-#        -d '{"name": "Integration Token", "expires_at": "2025-12-31"}' \
-#        -H "Authorization: Bearer <user_session_token>"
-#
-# @example GET /api/v1/tokens/:id
-#   curl "/api/v1/tokens/123" \
-#        -H "Authorization: Bearer <user_session_token>"
 #
 # @see ApiToken
 # @see Mutations::CreateApiToken
 # @since 2025-07-19
 module Api
   module V1
-    # Controller handling API token operations
-    #
-    # @!method show
-    #   Displays a specific API token belonging to the current user
-    #   @return [void] Renders the token details view
-    #   @raise [ActiveRecord::RecordNotFound] If token doesn't exist or doesn't belong to user
-    #
-    # @!method create
-    #   Creates a new API token or displays creation form
-    #   For GET requests, displays the creation form
-    #   For POST requests, creates a new token with provided parameters
-    #   @return [void] Renders appropriate view with token data or form
     class TokensController < ApplicationController
-      # Ensure user is authenticated for all actions
       before_action :authenticate_user!
-      
-      # Shows details of a specific API token
+      before_action :set_token, only: [:show, :revoke, :renew, :destroy]
+
+      # Lists all tokens for the current user.
+      # Redirects to new token form if the user has no tokens yet.
       #
-      # @return [void] Renders the show view with @token instance variable
-      # @raise [ActiveRecord::RecordNotFound] If token not found or unauthorized
-      def show
-        @token = current_user.api_tokens.find(params[:id])
+      # @return [void]
+      def index
+        @tokens = current_user.api_tokens.order(created_at: :desc)
+        redirect_to new_api_v1_token_path if @tokens.empty?
       end
 
-      # Handles both GET (form display) and POST (token creation) requests
+      # Displays a specific token.
       #
-      # @return [void] Renders create view for GET or processes creation for POST
-      # @note GET requests display the creation form
-      # @note POST requests create new tokens and display results
+      # @return [void]
+      def show
+      end
+
+      # Displays the new token form.
+      #
+      # @return [void]
+      def new
+        @token = current_user.api_tokens.build
+        @role_permissions = current_user.role.permissions.where(deprecated: false).order(:name)
+      end
+
+      # Creates a new API token.
+      #
+      # Assigns only permissions that belong to the current user's role and are
+      # not deprecated. Any out-of-scope permission id is silently ignored before
+      # the model-level validation runs.
+      #
+      # @return [void]
       def create
-        # If an ID is provided in parameters, we retrieve the existing token
-        if params[:id].present?
-          @token = current_user.api_tokens.find(params[:id])
-          return render :show
-        end
-
-        # For GET requests without data, we just display the form
-        if request.get?
-          # If no parameter is provided, we prepare an empty token for the view
-          @token = current_user.api_tokens.build unless @token
-          return render :create
-        end
-
-        # For POST, we create a new token
         @token = current_user.api_tokens.build(token_params)
-        
-        # Generate the API token
         raw_token = SecureRandom.hex(32)
         @token.token_digest = Digest::SHA256.hexdigest(raw_token)
         @token.expires_at ||= 30.days.from_now
 
+        allowed_ids = current_user.role.permissions.where(deprecated: false).pluck(:id).to_set
+        selected_ids = (params.dig(:token, :permission_ids) || []).map(&:to_i).select { |id| allowed_ids.include?(id) }
+        @token.permission_ids = selected_ids
+
         if @token.save
-          # Add the raw token for display (visible only at creation)
-          @token.define_singleton_method(:raw_token) { raw_token }
-          flash[:notice] = "API token created successfully"
+          flash[:raw_token] = raw_token
+          redirect_to api_v1_token_path(@token), notice: "API token created successfully"
         else
-          flash[:alert] = "Error creating token: #{@token.errors.full_messages.join(', ')}"
+          @role_permissions = current_user.role.permissions.where(deprecated: false).order(:name)
+          render :new, status: :unprocessable_entity
         end
-        
-        render :create
+      end
+
+      # Revokes a token by setting its expiration to now.
+      #
+      # @return [void]
+      # @note The token record is kept for audit purposes
+      def revoke
+        @token.update!(expires_at: Time.current)
+        redirect_to api_v1_tokens_path, notice: "Token \"#{@token.name}\" has been revoked."
+      end
+
+      # Renews a token by extending its expiration by 30 days from now.
+      #
+      # @return [void]
+      def renew
+        @token.update!(expires_at: 30.days.from_now)
+        redirect_to api_v1_tokens_path, notice: "Token \"#{@token.name}\" renewed until #{@token.expires_at.strftime('%b %d, %Y')}."
+      end
+
+      # Permanently deletes a token.
+      #
+      # @return [void]
+      def destroy
+        name = @token.name
+        @token.destroy!
+        redirect_to api_v1_tokens_path, notice: "Token \"#{name}\" has been deleted."
       end
 
       private
 
-      # Strong parameters for token creation
-      #
-      # @return [ActionController::Parameters] Permitted parameters
+      # @api private
+      def set_token
+        @token = current_user.api_tokens.find(params[:id])
+      end
+
       # @api private
       def token_params
         params.permit(:name, :expires_at)

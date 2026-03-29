@@ -66,7 +66,11 @@ module Types
     
     # @return [Types::UserType] The token owner
     field :user, Types::UserType, null: false
-    
+
+    # @return [Array<Types::PermissionType>] Permissions granted to this token
+    field :permissions, [Types::PermissionType], null: false,
+          description: "Permissions granted to this token (subset of role permissions)"
+
     # @return [Boolean] Whether the token has not yet expired
     field :active, Boolean, null: false, description: "Indicates if the token has not yet expired"
 

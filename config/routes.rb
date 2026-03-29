@@ -1,11 +1,20 @@
 Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
-      get "tokens/create", to: "tokens#create"
-      resources :tokens, only: [:create, :show]
+      resources :tokens, only: [:index, :new, :create, :show, :destroy] do
+        member do
+          patch :revoke
+          patch :renew
+        end
+      end
     end
   end
   
+  # Admin routes
+  namespace :admin do
+    resources :roles, only: [:index, :edit, :update]
+  end
+
   # Authentication routes
   get '/login', to: 'sessions#new', as: 'login'
   post '/sessions', to: 'sessions#create'

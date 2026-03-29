@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_22_141245) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_28_135759) do
+  create_table "api_token_permissions", force: :cascade do |t|
+    t.integer "api_token_id", null: false
+    t.integer "permission_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["api_token_id", "permission_id"], name: "index_api_token_permissions_on_api_token_id_and_permission_id", unique: true
+    t.index ["api_token_id"], name: "index_api_token_permissions_on_api_token_id"
+    t.index ["permission_id"], name: "index_api_token_permissions_on_permission_id"
+  end
+
   create_table "api_tokens", force: :cascade do |t|
     t.string "name"
     t.string "token_digest"
@@ -20,6 +30,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_22_141245) do
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.index ["user_id"], name: "index_api_tokens_on_user_id"
+  end
+
+  create_table "permissions", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "description", default: "", null: false
+    t.boolean "deprecated", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_permissions_on_name", unique: true
+  end
+
+  create_table "role_permissions", force: :cascade do |t|
+    t.integer "role_id", null: false
+    t.integer "permission_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["permission_id"], name: "index_role_permissions_on_permission_id"
+    t.index ["role_id", "permission_id"], name: "index_role_permissions_on_role_id_and_permission_id", unique: true
+    t.index ["role_id"], name: "index_role_permissions_on_role_id"
   end
 
   create_table "roles", force: :cascade do |t|
@@ -40,6 +69,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_22_141245) do
     t.index ["role_id"], name: "index_users_on_role_id"
   end
 
+  add_foreign_key "api_token_permissions", "api_tokens"
+  add_foreign_key "api_token_permissions", "permissions"
   add_foreign_key "api_tokens", "users"
+  add_foreign_key "role_permissions", "permissions"
+  add_foreign_key "role_permissions", "roles"
   add_foreign_key "users", "roles"
 end

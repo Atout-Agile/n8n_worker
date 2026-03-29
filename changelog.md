@@ -1,5 +1,56 @@
 # Changelog
 
+## [0.2.0] — 2026-03-29
+
+### Permission system
+
+Complete permission-based authorization system enforcing the invariant `token.permissions ⊆ user.role.permissions`.
+
+**Data model**
+- New `permissions` table (`name`, `description`, `deprecated`) — format `resource:action`
+- New `role_permissions` join table — role ↔ permission (unique index on pair)
+- New `api_token_permissions` join table — token ↔ permission (unique index on pair)
+- `Role has_many :permissions through :role_permissions` with `after_remove` cascade: removing a permission from a role automatically revokes it from all tokens of users in that role
+- `ApiToken has_many :permissions through :api_token_permissions` — model-level validation rejects permissions outside the user's role
+
+**Authorization (Action Policy)**
+- `ApplicationPolicy` base class — `active_permissions` resolves to token permissions (API token auth) or role permissions (JWT auth)
+- `UserPolicy`, `ApiTokenPolicy`, `RolePolicy` — rules `read?` / `write?` mapped to `resource:action` permissions
+- `BaseMutation` / `BaseQuery` — `permission_required` DSL; every protected operation declares its required permission
+- GraphQL schema: `rescue_from ActionPolicy::Unauthorized` — returns `NOT_AUTHORIZED` / `UNAUTHORIZED` with structured JSON log (`graphql.access_denied`)
+
+**GraphQL API — new operations**
+- `query { roles }` — list roles with their permissions (`roles:read`)
+- `query { permissions }` — list all non-deprecated permissions (`roles:read`)
+- `mutation { updateRolePermissions(roleId, permissionIds) }` — assign permissions to a role (`roles:write`)
+- `mutation { updateApiTokenPermissions(id, permissionIds) }` — update a token's permission subset (`tokens:write`)
+- `mutation { createApiToken }` — extended with optional `permissionIds` argument
+
+**Admin interface**
+- `GET /admin/roles` — lists roles with assigned permissions (admin only)
+- `GET /admin/roles/:id/edit` — permission checkboxes grouped by resource, deprecated permissions greyed out
+- `PATCH /admin/roles/:id` — saves role permissions
+
+**Token creation UI**
+- `/api/v1/tokens/new` — permission checkboxes showing only the user's role permissions
+- Token detail view (`show`) displays assigned permissions
+
+**Rake task**
+- `rails permissions:sync` — scans all resolvers for `permission_required` declarations, upserts `Permission` records, marks removed ones as `deprecated: true`; called automatically by `db:seed`
+
+**Seeds**
+- Admin role receives all non-deprecated permissions on every `db:seed`
+- User role has no permissions by default (configured via `/admin/roles`)
+
+**Structured logging**
+- `graphql.token_access` (info) — every request authenticated via API token
+- `graphql.access_denied` (warn) — every authorization denial with `user_id`, `token_id`, `operation`, `rule`
+
+**Tests** — 265 examples, 0 failures, 97.45% coverage
+- New: `spec/graphql/authorization_spec.rb`, `spec/requests/graphql_logging_spec.rb`, `spec/requests/admin/roles_controller_spec.rb`, `spec/graphql/mutations/update_role_permissions_spec.rb`, `spec/graphql/mutations/update_api_token_permissions_spec.rb`, `spec/graphql/queries/roles_and_permissions_spec.rb`, `spec/lib/tasks/permissions_sync_spec.rb`, `spec/models/permission_spec.rb`, `spec/models/role_permission_spec.rb`
+
+---
+
 ## [2026-03-23--0005]
 
 ### VerifyToken GraphQL Query

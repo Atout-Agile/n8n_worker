@@ -40,5 +40,17 @@ module Types
     # API token revocation mutation
     # @since 2026-03-23
     field :revoke_api_token, mutation: Mutations::RevokeApiToken
+
+    # User profile update mutation
+    # @since 2026-03-28
+    field :update_user, mutation: Mutations::UpdateUser
+
+    # API token permission update mutation
+    # @since 2026-03-29
+    field :update_api_token_permissions, mutation: Mutations::UpdateApiTokenPermissions
+
+    # Role permission update mutation
+    # @since 2026-03-29
+    field :update_role_permissions, mutation: Mutations::UpdateRolePermissions
   end
 end

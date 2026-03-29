@@ -42,7 +42,7 @@ class SessionsController < ApplicationController
   def login_mutation
     <<~GRAPHQL
       mutation Login($email: String!, $password: String!) {
-        login(input: { email: $email, password: $password }) {
+        login(email: $email, password: $password) {
           token
           user {
             id

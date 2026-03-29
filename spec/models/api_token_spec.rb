@@ -31,6 +31,38 @@ RSpec.describe ApiToken, type: :model do
 
   describe 'associations' do
     it { should belong_to(:user) }
+    it { should have_many(:api_token_permissions).dependent(:destroy) }
+    it { should have_many(:permissions).through(:api_token_permissions) }
+  end
+
+  describe 'permissions validation' do
+    let(:role_perm) { create(:permission, :users_read) }
+    let(:other_perm) { create(:permission, :tokens_read) }
+
+    before { role.permissions << role_perm }
+
+    it 'accepts a token with zero permissions' do
+      token = build(:api_token, user: user)
+      expect(token).to be_valid
+    end
+
+    it 'accepts a token with a valid subset of role permissions' do
+      token = build(:api_token, user: user, permissions: [role_perm])
+      expect(token).to be_valid
+    end
+
+    it 'rejects a token with a permission not in the role' do
+      token = build(:api_token, user: user, permissions: [other_perm])
+      expect(token).not_to be_valid
+      expect(token.errors[:permissions]).to include(
+        a_string_including('tokens:read')
+      )
+    end
+
+    it 'rejects a token where only some permissions are invalid' do
+      token = build(:api_token, user: user, permissions: [role_perm, other_perm])
+      expect(token).not_to be_valid
+    end
   end
 
   describe 'callbacks' do
