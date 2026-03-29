@@ -363,7 +363,7 @@ Le `TODO: Implement this method` lève une `RequiredImplementationMissingError` 
 - Soit implémenter, soit supprimer le stub et laisser graphql-ruby gérer le défaut
 - Documenter l'intention
 
-### [QUALITÉ] Magic number 30 jours dupliqué [⌛]
+### [QUALITÉ] Magic number 30 jours dupliqué [✓]
 La valeur `30` (durée d'expiration par défaut d'un token) est hardcodée dans :
 - `app/models/api_token.rb`
 - `app/graphql/mutations/create_api_token.rb`

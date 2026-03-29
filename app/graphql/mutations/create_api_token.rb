@@ -37,8 +37,9 @@ module Mutations
 
     # @!attribute [r] expires_in_days
     #   @return [Integer] Number of days until token expiration
-    argument :expires_in_days, Integer, required: false, default_value: 30,
-             description: "Number of days until expiration (default: 30)"
+    argument :expires_in_days, Integer, required: false,
+             default_value: ApiToken::DEFAULT_EXPIRATION_DAYS,
+             description: "Number of days until expiration (default: #{ApiToken::DEFAULT_EXPIRATION_DAYS})"
 
     # @!attribute [r] permission_ids
     #   @return [Array<ID>] Permissions to grant (must be a subset of the user's role permissions)

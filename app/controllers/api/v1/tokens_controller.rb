@@ -46,7 +46,7 @@ module Api
         @token = current_user.api_tokens.build(token_params)
         raw_token = SecureRandom.hex(32)
         @token.token_digest = Digest::SHA256.hexdigest(raw_token)
-        @token.expires_at ||= 30.days.from_now
+        @token.expires_at ||= ApiToken::DEFAULT_EXPIRATION_DAYS.days.from_now
 
         allowed_ids = current_user.assignable_permissions.pluck(:id).to_set
         selected_ids = (params.dig(:token, :permission_ids) || []).map(&:to_i).select { |id| allowed_ids.include?(id) }
@@ -74,7 +74,7 @@ module Api
       #
       # @return [void]
       def renew
-        @token.update!(expires_at: 30.days.from_now)
+        @token.update!(expires_at: ApiToken::DEFAULT_EXPIRATION_DAYS.days.from_now)
         redirect_to api_v1_tokens_path, notice: "Token \"#{@token.name}\" renewed until #{@token.expires_at.strftime('%b %d, %Y')}."
       end
 
