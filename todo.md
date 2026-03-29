@@ -352,7 +352,7 @@ La logique `user.role.permissions.where(deprecated: false).pluck(:id).to_set` es
 - Extraire dans une méthode `User#assignable_permissions` (ou scope `Permission.assignable_for(user)`)
 - Mettre à jour les 4 appelants
 
-### [QUALITÉ] `test_field` toujours présent dans `QueryType` [⌛]
+### [QUALITÉ] `test_field` toujours présent dans `QueryType` [✓]
 `app/graphql/types/query_type.rb`
 Le champ `test_field` avec son commentaire `# TODO: remove me` est exposé en production.
 - Supprimer le champ et son test associé

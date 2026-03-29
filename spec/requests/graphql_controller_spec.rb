@@ -9,9 +9,7 @@ RSpec.describe GraphqlController, type: :request do
   describe 'POST /graphql' do
     let(:valid_query) do
       <<~GQL
-        query {
-          testField
-        }
+        mutation { login(email: "nobody@example.com", password: "wrong") { errors } }
       GQL
     end
 
@@ -36,7 +34,7 @@ RSpec.describe GraphqlController, type: :request do
 
         expect(response).to have_http_status(:success)
         json = JSON.parse(response.body)
-        expect(json['data']['testField']).to eq('Hello World!')
+        expect(json['data']['login']).to be_present
       end
 
       it 'handles variables correctly' do
@@ -298,7 +296,7 @@ RSpec.describe GraphqlController, type: :request do
         expect(response).to have_http_status(:success)
         json = JSON.parse(response.body)
         # Request goes through but current_user is nil (unauthenticated)
-        expect(json['data']['testField']).to be_nil.or eq('Hello World!')
+        expect(json['data']).to be_present
       end
 
       it 'rejects an unknown token' do
