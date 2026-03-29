@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased] — 2026-03-29
+## [0.2.2] — 2026-03-29
 
 ### Performance — N+1 elimination
 
