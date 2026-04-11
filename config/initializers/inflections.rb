@@ -14,3 +14,14 @@
 # ActiveSupport::Inflector.inflections(:en) do |inflect|
 #   inflect.acronym "RESTful"
 # end
+
+# Register "JWT" as an acronym so Zeitwerk expects app/lib/jwt/*.rb to
+# define constants under the JWT:: module (all-caps), not Jwt:: (camelcase).
+# Without this, Rails.application.eager_load! fails on
+# app/lib/jwt/authenticate_graphql_request.rb which defines
+# JWT::AuthenticateGraphqlRequest.
+#
+# @since 2026-04-11
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.acronym "JWT"
+end
