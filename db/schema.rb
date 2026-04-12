@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_11_100400) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_11_100500) do
   create_table "api_token_permissions", force: :cascade do |t|
     t.integer "api_token_id", null: false
     t.integer "permission_id", null: false
@@ -50,6 +50,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_11_100400) do
     t.index ["deleted_at"], name: "index_calendar_events_on_deleted_at"
     t.index ["user_id", "external_uid"], name: "index_calendar_events_on_user_id_and_external_uid", unique: true
     t.index ["user_id", "starts_at"], name: "index_calendar_events_on_user_id_and_starts_at"
+  end
+
+  create_table "calendar_reminders", force: :cascade do |t|
+    t.integer "calendar_event_id", null: false
+    t.integer "offset_minutes", null: false
+    t.datetime "fires_at", null: false
+    t.string "state", default: "pending", null: false
+    t.text "content_snapshot_json", default: "{}", null: false
+    t.string "solid_queue_job_key"
+    t.datetime "fired_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["calendar_event_id"], name: "index_calendar_reminders_on_calendar_event_id"
+    t.index ["state", "fires_at"], name: "index_calendar_reminders_on_state_and_fires_at"
   end
 
   create_table "notification_channels", force: :cascade do |t|
@@ -251,6 +265,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_11_100400) do
   add_foreign_key "api_token_permissions", "permissions"
   add_foreign_key "api_tokens", "users"
   add_foreign_key "calendar_events", "users"
+  add_foreign_key "calendar_reminders", "calendar_events"
   add_foreign_key "notification_channels", "shared_notification_channels"
   add_foreign_key "notification_channels", "users"
   add_foreign_key "role_permissions", "permissions"
