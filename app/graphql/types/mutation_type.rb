@@ -58,5 +58,9 @@ module Types
 
     # @since 2026-04-11
     field :set_calendar_source, mutation: Mutations::SetCalendarSource
+
+    # @since 2026-04-11
+    field :upsert_notification_channel, mutation: Mutations::UpsertNotificationChannel
+    field :delete_notification_channel, mutation: Mutations::DeleteNotificationChannel
   end
 end
