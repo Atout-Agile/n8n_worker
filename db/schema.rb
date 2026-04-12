@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_11_100100) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_11_100250) do
   create_table "api_token_permissions", force: :cascade do |t|
     t.integer "api_token_id", null: false
     t.integer "permission_id", null: false
@@ -30,6 +30,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_11_100100) do
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.index ["user_id"], name: "index_api_tokens_on_user_id"
+  end
+
+  create_table "notification_channels", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "shared_notification_channel_id"
+    t.string "channel_type", null: false
+    t.boolean "active", default: false, null: false
+    t.text "config_json", default: "{}", null: false
+    t.datetime "consent_acknowledged_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shared_notification_channel_id"], name: "index_notification_channels_on_shared_notification_channel_id"
+    t.index ["user_id", "channel_type"], name: "index_notification_channels_on_user_id_and_channel_type"
+    t.index ["user_id"], name: "index_notification_channels_on_user_id"
   end
 
   create_table "permissions", force: :cascade do |t|
@@ -54,6 +68,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_11_100100) do
   create_table "roles", force: :cascade do |t|
     t.string "name"
     t.string "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "shared_notification_channels", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -206,6 +225,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_11_100100) do
   add_foreign_key "api_token_permissions", "api_tokens"
   add_foreign_key "api_token_permissions", "permissions"
   add_foreign_key "api_tokens", "users"
+  add_foreign_key "notification_channels", "users"
   add_foreign_key "role_permissions", "permissions"
   add_foreign_key "role_permissions", "roles"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
