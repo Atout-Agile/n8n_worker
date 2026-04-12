@@ -64,6 +64,9 @@ module Types
     field :delete_notification_channel, mutation: Mutations::DeleteNotificationChannel
 
     # @since 2026-04-11
+    field :purge_my_alerts, mutation: Mutations::PurgeMyAlerts
+
+    # @since 2026-04-11
     field :acknowledge_shared_channel_consent, mutation: Mutations::AcknowledgeSharedChannelConsent
     field :add_shared_channel_to_my_channels, mutation: Mutations::AddSharedChannelToMyChannels
     field :remove_shared_channel_from_my_channels, mutation: Mutations::RemoveSharedChannelFromMyChannels

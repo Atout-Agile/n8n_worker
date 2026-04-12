@@ -44,5 +44,8 @@ module Types
 
     # @since 2026-04-11
     field :shared_notification_channels, resolver: Queries::SharedNotificationChannels
+
+    # @since 2026-04-11
+    field :assistant_alerts, resolver: Queries::AssistantAlerts
   end
 end
