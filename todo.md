@@ -110,7 +110,7 @@ Afin de garantir une expérience utilisateur cohérente
 En tant que développeur de l'application
 Je veux créer des tests qui vérifient le rendu des vues dans différentes situations (succès, erreur, données manquantes)
 
-## Système de Permissions [⌛ To create in n8n_worker project]
+## Système de Permissions [✓ Completed in n8n_worker project]
 
 ### Décisions d'architecture
 
@@ -185,7 +185,7 @@ La liste canonique des permissions est donc dérivée du code lui-même (scan de
 
 ---
 
-### Story 1 — Modèle de données Permission [⌛ To create in n8n_worker project]
+### Story 1 — Modèle de données Permission [✓ Completed in n8n_worker project]
 Sachant que les accès GraphQL doivent être contrôlés par des permissions associées aux rôles
 Afin d'établir les fondations du système d'autorisation
 En tant que développeur
@@ -208,7 +208,7 @@ Je veux :
 - `ApiToken` : validation accepte zéro permission (token sans droit)
 - Factory `permission` avec traits (`users_read`, `users_write`, `tokens_read`, `tokens_write`)
 
-### Story 2 — Rake task `permissions:sync` [⌛ To create in n8n_worker project]
+### Story 2 — Rake task `permissions:sync` [✓ Completed in n8n_worker project]
 Sachant que les permissions sont déclarées dans le code via `permission_required`
 Afin de maintenir la base de données en phase avec le code automatiquement
 En tant que développeur
@@ -228,7 +228,7 @@ Je veux une tâche Rake `rails permissions:sync` qui :
 - Ne modifie pas une permission déjà à jour
 - Le résumé affiche les bonnes métriques
 
-### Story 3 — Intégration Action Policy [⌛ To create in n8n_worker project]
+### Story 3 — Intégration Action Policy [✓ Completed in n8n_worker project]
 Sachant que les permissions sont modélisées et synchronisées
 Afin de les appliquer sur chaque opération GraphQL
 En tant que développeur
@@ -255,7 +255,7 @@ Je veux :
 - Token sans permissions : toutes les opérations protégées retournent `NOT_AUTHORIZED`
 - Format de l'erreur : `{ "errors": [{ "message": "NOT_AUTHORIZED", "extensions": { "code": "UNAUTHORIZED" } }] }`
 
-### Story 4 — Interface admin des rôles et permissions [⌛ To create in n8n_worker project]
+### Story 4 — Interface admin des rôles et permissions [✓ Completed in n8n_worker project]
 Sachant que les permissions sont gérées dynamiquement depuis le code
 Afin de permettre à un administrateur d'assigner des permissions aux rôles
 En tant qu'administrateur
@@ -273,7 +273,7 @@ Je veux :
 - Les permissions dépréciées apparaissent grisées
 - Un non-admin est redirigé
 
-### Story 5 — Interface de sélection des permissions à la création de token [⌛ To create in n8n_worker project]
+### Story 5 — Interface de sélection des permissions à la création de token [✓ Completed in n8n_worker project]
 Sachant que les tokens ne peuvent disposer que d'un sous-ensemble des permissions du rôle
 Afin de permettre à un utilisateur de choisir ce sous-ensemble à la création
 En tant qu'utilisateur connecté
@@ -289,7 +289,7 @@ Je veux :
 - La soumission avec un sous-ensemble valide crée le token avec ses permissions
 - La vue `show` liste les permissions du token
 
-### Story 6 — Vérification par requête et logging [⌛ To create in n8n_worker project]
+### Story 6 — Vérification par requête et logging [✓ Completed in n8n_worker project]
 Sachant que chaque requête GraphQL authentifiée par token doit être tracée
 Afin d'auditer les accès et de maintenir `last_used_at` à jour
 En tant que développeur
@@ -303,7 +303,7 @@ Je veux :
 - Un refus produit une entrée dans les logs avec les bons champs
 - Un accès autorisé produit une entrée dans les logs
 
-### Story 7 — Documentation des permissions [⌛ To create in n8n_worker project]
+### Story 7 — Documentation des permissions [✓ Completed in n8n_worker project]
 Sachant que des développeurs externes utiliseront l'API avec des tokens
 Afin de faciliter l'intégration
 En tant que développeur
