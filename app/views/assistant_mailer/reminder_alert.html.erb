@@ -1,0 +1,10 @@
+<h2><%= @content.title %></h2>
+<p><strong><%= @content.time_until_start_label %></strong></p>
+<p>Starts at <em><%= @content.starts_at&.utc&.iso8601 %></em></p>
+<% if @content.location.present? %>
+  <p>Location: <%= @content.location %></p>
+<% end %>
+<% if @content.description.present? %>
+  <hr>
+  <pre><%= @content.description %></pre>
+<% end %>
