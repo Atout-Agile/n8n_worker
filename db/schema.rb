@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_11_099900) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_11_100100) do
   create_table "api_token_permissions", force: :cascade do |t|
     t.integer "api_token_id", null: false
     t.integer "permission_id", null: false
@@ -179,6 +179,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_11_099900) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "user_assistant_configs", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "timezone", default: "UTC", null: false
+    t.text "reminder_intervals_json", default: "[60,15,5]", null: false
+    t.string "calendar_source_type", default: "ics", null: false
+    t.string "calendar_source_url"
+    t.datetime "last_polled_at"
+    t.string "last_poll_status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_user_assistant_configs_on_user_id", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "email"
@@ -201,5 +214,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_11_099900) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "user_assistant_configs", "users"
   add_foreign_key "users", "roles"
 end
