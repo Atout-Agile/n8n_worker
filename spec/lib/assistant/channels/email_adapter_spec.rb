@@ -25,7 +25,7 @@ RSpec.describe Assistant::Channels::EmailAdapter do
     it "enqueues a reminder_alert email to the configured address" do
       expect do
         described_class.new(channel: channel).emit(content: content, reminder: reminder)
-      end.to have_enqueued_mail(AssistantMailer, :reminder_alert_from_hash)
+      end.to have_enqueued_mail(AssistantMailer, :reminder_alert)
     end
 
     it "returns success" do
@@ -34,7 +34,15 @@ RSpec.describe Assistant::Channels::EmailAdapter do
     end
 
     it "renders the email with expected subject and body" do
-      AssistantMailer.reminder_alert(address: "user@example.com", content: content).deliver_now
+      AssistantMailer.reminder_alert(
+        address: "user@example.com",
+        title: content.title,
+        time_until_start_label: content.time_until_start_label,
+        starts_at: content.starts_at&.utc&.iso8601,
+        ends_at: content.ends_at&.utc&.iso8601,
+        location: content.location,
+        description: content.description
+      ).deliver_now
       email = ActionMailer::Base.deliveries.last
       expect(email.to).to eq([ "user@example.com" ])
       expect(email.subject).to include("Dentist")

@@ -1,6 +1,6 @@
 <%= @content.title %> — <%= @content.time_until_start_label %>
 
-Starts: <%= @content.starts_at&.utc&.iso8601 %>
+Starts: <%= @content.starts_at %>
 <% if @content.location.present? %>Location: <%= @content.location %><% end %>
 
 <%= @content.description %>

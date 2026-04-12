@@ -15,13 +15,19 @@ module Assistant
         end
       end
 
+      # @param channel [NotificationChannel] the channel record this adapter
+      #   will deliver through
       def initialize(channel:)
         @channel = channel
       end
 
-      # @param content [Assistant::AlertContent]
-      # @param reminder [CalendarReminder]
+      # Deliver an alert through the concrete channel implementation.
+      #
+      # @param content [Assistant::AlertContent] the structured alert payload
+      # @param reminder [CalendarReminder] the triggering reminder record
       # @return [Result]
+      # @note reminder is provided for adapters that need to record provenance;
+      #   implementations that do not use it should suppress the warning with _ = reminder
       def emit(content:, reminder:)
         raise NotImplementedError
       end

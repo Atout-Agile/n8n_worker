@@ -17,7 +17,8 @@ module Assistant
 
       def emit(content:, reminder:)
         _ = reminder
-        uri = URI.parse("#{channel.config["base_url"]}/#{channel.config["topic"]}")
+        base = channel.config["base_url"].to_s.delete_suffix("/")
+        uri = URI.parse("#{base}/#{channel.config["topic"]}")
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = uri.is_a?(URI::HTTPS)
         http.open_timeout = OPEN_TIMEOUT

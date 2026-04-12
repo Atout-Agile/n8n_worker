@@ -27,11 +27,11 @@ module Assistant
         adapter_class.new(channel: effective_channel(channel))
       end
 
-      def self.resolve_type(channel)
+      private_class_method def self.resolve_type(channel)
         channel.channel_type == "shared" ? channel.shared_notification_channel.channel_type : channel.channel_type
       end
 
-      def self.effective_channel(channel)
+      private_class_method def self.effective_channel(channel)
         return channel unless channel.channel_type == "shared"
 
         SharedChannelDecorator.new(channel)

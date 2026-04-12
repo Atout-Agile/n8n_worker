@@ -11,11 +11,12 @@ module Assistant
       def emit(content:, reminder:)
         _ = reminder
         address = channel.config["address"]
-        AssistantMailer.reminder_alert_from_hash(
+        AssistantMailer.reminder_alert(
           address: address,
           title: content.title,
           time_until_start_label: content.time_until_start_label,
           starts_at: content.starts_at&.utc&.iso8601,
+          ends_at: content.ends_at&.utc&.iso8601,
           location: content.location,
           description: content.description
         ).deliver_later
