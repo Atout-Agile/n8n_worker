@@ -34,5 +34,8 @@ module Types
 
     # @since 2026-03-29
     field :permissions, resolver: Queries::Permissions
+
+    # @since 2026-04-11
+    field :assistant_config, resolver: Queries::AssistantConfig
   end
 end

@@ -52,5 +52,8 @@ module Types
     # Role permission update mutation
     # @since 2026-03-29
     field :update_role_permissions, mutation: Mutations::UpdateRolePermissions
+
+    # @since 2026-04-11
+    field :update_assistant_config, mutation: Mutations::UpdateAssistantConfig
   end
 end
