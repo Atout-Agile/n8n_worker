@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_11_100300) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_11_100400) do
   create_table "api_token_permissions", force: :cascade do |t|
     t.integer "api_token_id", null: false
     t.integer "permission_id", null: false
@@ -30,6 +30,26 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_11_100300) do
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.index ["user_id"], name: "index_api_tokens_on_user_id"
+  end
+
+  create_table "calendar_events", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "external_uid", null: false
+    t.string "title", null: false
+    t.datetime "starts_at", null: false
+    t.datetime "ends_at", null: false
+    t.string "location"
+    t.text "description"
+    t.datetime "source_last_modified"
+    t.datetime "last_seen_at", null: false
+    t.integer "disappeared_tick_count", default: 0, null: false
+    t.datetime "deleted_at"
+    t.text "raw_payload"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["deleted_at"], name: "index_calendar_events_on_deleted_at"
+    t.index ["user_id", "external_uid"], name: "index_calendar_events_on_user_id_and_external_uid", unique: true
+    t.index ["user_id", "starts_at"], name: "index_calendar_events_on_user_id_and_starts_at"
   end
 
   create_table "notification_channels", force: :cascade do |t|
@@ -230,6 +250,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_11_100300) do
   add_foreign_key "api_token_permissions", "api_tokens"
   add_foreign_key "api_token_permissions", "permissions"
   add_foreign_key "api_tokens", "users"
+  add_foreign_key "calendar_events", "users"
   add_foreign_key "notification_channels", "shared_notification_channels"
   add_foreign_key "notification_channels", "users"
   add_foreign_key "role_permissions", "permissions"
