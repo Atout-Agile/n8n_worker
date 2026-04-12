@@ -6,6 +6,7 @@ class User < ApplicationRecord
   has_one :assistant_config, class_name: "UserAssistantConfig", dependent: :destroy
   has_many :notification_channels, dependent: :destroy
   has_many :calendar_events, dependent: :destroy
+  has_many :alert_emissions, dependent: :destroy
 
   has_secure_password
 

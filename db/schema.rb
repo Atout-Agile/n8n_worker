@@ -10,7 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_11_100500) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_11_100600) do
+  create_table "alert_emissions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "calendar_reminder_id", null: false
+    t.text "content_snapshot_json", default: "{}", null: false
+    t.datetime "emitted_at", null: false
+    t.text "channel_attempts_json", default: "[]", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["calendar_reminder_id"], name: "index_alert_emissions_on_calendar_reminder_id"
+    t.index ["user_id", "emitted_at"], name: "index_alert_emissions_on_user_id_and_emitted_at"
+  end
+
   create_table "api_token_permissions", force: :cascade do |t|
     t.integer "api_token_id", null: false
     t.integer "permission_id", null: false
@@ -261,6 +273,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_11_100500) do
     t.index ["role_id"], name: "index_users_on_role_id"
   end
 
+  add_foreign_key "alert_emissions", "calendar_reminders"
+  add_foreign_key "alert_emissions", "users"
   add_foreign_key "api_token_permissions", "api_tokens"
   add_foreign_key "api_token_permissions", "permissions"
   add_foreign_key "api_tokens", "users"
