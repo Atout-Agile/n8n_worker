@@ -95,4 +95,11 @@ gem "yard", "~> 0.9.37"
 
 gem "redcarpet", "~> 3.6"
 
+# ICS calendar parsing for the assistant subsystem (S1).
+# See TECH_NOTES/assistant-perso-s1-spec for context.
+gem "icalendar", "~> 2.10"
+
+# HTTP stubbing for channel adapter specs.
+gem "webmock", "~> 3.24", group: :test
+
 gem "graphql-docs", "~> 5.2"
