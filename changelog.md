@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.3] — 2026-04-12
+
+### Documentation & project tracking
+
+- `todo.md` — marked all seven permission-system stories as completed; they were shipped across releases 0.2.0–0.2.2 but the tracking file was never updated
+- `contributing.md` — permission system section confirmed complete: covers available permissions, the `permission_required` DSL, the `rails permissions:sync` workflow, error format, and structured logging
+- `README.md` — permissions table and API token auth examples confirmed complete
+
+No production code changes in this release.
+
+---
+
 ## [0.2.2] — 2026-03-29
 
 ### Performance — N+1 elimination

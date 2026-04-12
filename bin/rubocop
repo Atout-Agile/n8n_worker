@@ -3,6 +3,7 @@ require "rubygems"
 require "bundler/setup"
 
 # explicit rubocop config increases performance slightly while avoiding config confusion.
-ARGV.unshift("--config", File.expand_path("../.rubocop.yml", __dir__))
+# --force-exclusion ensures AllCops/Exclude patterns apply even when files are passed explicitly.
+ARGV.unshift("--config", File.expand_path("../.rubocop.yml", __dir__), "--force-exclusion")
 
 load Gem.bin_path("rubocop", "rubocop")
