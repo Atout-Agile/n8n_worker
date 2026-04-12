@@ -55,5 +55,8 @@ module Types
 
     # @since 2026-04-11
     field :update_assistant_config, mutation: Mutations::UpdateAssistantConfig
+
+    # @since 2026-04-11
+    field :set_calendar_source, mutation: Mutations::SetCalendarSource
   end
 end
