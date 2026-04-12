@@ -43,7 +43,7 @@ module Mutations
 
     # @!attribute [r] permission_ids
     #   @return [Array<ID>] Permissions to grant (must be a subset of the user's role permissions)
-    argument :permission_ids, [ID], required: false, default_value: [],
+    argument :permission_ids, [ ID ], required: false, default_value: [],
              description: "IDs of permissions to grant (must be a subset of your role's permissions)"
 
     # @!attribute [r] api_token
@@ -52,7 +52,7 @@ module Mutations
 
     # @!attribute [r] errors
     #   @return [Array<String>] Array of validation or creation errors
-    field :errors, [String], null: false
+    field :errors, [ String ], null: false
 
     # @param name [String] The descriptive name for the token
     # @param expires_in_days [Integer] Number of days until expiration

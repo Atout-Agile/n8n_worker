@@ -15,7 +15,7 @@ RSpec.describe "GraphQL Authorization" do
   # A role with ALL permissions
   let(:full_role) do
     r = create(:role)
-    r.permissions = [users_read, users_write, tokens_read, tokens_write]
+    r.permissions = [ users_read, users_write, tokens_read, tokens_write ]
     r
   end
 
@@ -245,7 +245,7 @@ RSpec.describe "GraphQL Authorization" do
       role = create(:role)
       role.permissions << tokens_read
       user = create(:user, role: role)
-      token_record = create(:api_token, user: user, permissions: [tokens_read])
+      token_record = create(:api_token, user: user, permissions: [ tokens_read ])
 
       result = gql("query { apiTokens { id } }", user: user, token: token_record)
       expect(result.dig("data", "apiTokens")).to be_an(Array)
@@ -253,7 +253,7 @@ RSpec.describe "GraphQL Authorization" do
 
     it "denies access when the API token lacks the permission (even if role would allow it)" do
       # full_user role has all permissions, but the token holds only users:read
-      token_record = create(:api_token, user: full_user, permissions: [users_read])
+      token_record = create(:api_token, user: full_user, permissions: [ users_read ])
 
       result = gql("query { apiTokens { id } }", user: full_user, token: token_record)
       expect(not_authorized?(result)).to be true

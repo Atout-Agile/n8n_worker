@@ -32,7 +32,7 @@ class ApiToken < ApplicationRecord
 
   # @!attribute [r] id
   #   @return [Integer] Primary key
-  # @!attribute [rw] name  
+  # @!attribute [rw] name
   #   @return [String] Descriptive name for the token
   # @!attribute [rw] token_digest
   #   @return [String] SHA256 digest of the raw token
@@ -81,10 +81,10 @@ class ApiToken < ApplicationRecord
   public
 
   # Scopes
-  
+
   # @!scope class
   # @return [ActiveRecord::Relation<ApiToken>] Tokens that have not yet expired
-  scope :active, -> { where('expires_at > ?', Time.current) }
+  scope :active, -> { where("expires_at > ?", Time.current) }
 
   # Callbacks
   before_validation :set_default_expiration, if: -> { expires_at.blank? }
@@ -101,14 +101,14 @@ class ApiToken < ApplicationRecord
     #   puts token.raw_token if token.persisted?
     def generate_for_user(user, name, expires_in_days: DEFAULT_EXPIRATION_DAYS)
       raw_token = SecureRandom.hex(32)
-      
+
       api_token = new(
         user: user,
         name: name,
         token_digest: Digest::SHA256.hexdigest(raw_token),
         expires_at: expires_in_days.days.from_now
       )
-      
+
       if api_token.save
         api_token.raw_token = raw_token
       end
@@ -170,7 +170,7 @@ class ApiToken < ApplicationRecord
   #   expired_token.expires_in_words  # => "Expired"
   def expires_in_words
     return "Expired" if expired?
-    
+
     distance_of_time_in_words(Time.current, expires_at)
   end
 

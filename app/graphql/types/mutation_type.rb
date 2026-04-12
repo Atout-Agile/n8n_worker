@@ -9,10 +9,10 @@
 #       user { id name }
 #       errors
 #     }
-#     
+#
 #     createApiToken(name: "My Token", expiresInDays: 30) {
 #       apiToken { id name token }
-#       errors  
+#       errors
 #     }
 #   }
 #

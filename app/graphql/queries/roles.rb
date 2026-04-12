@@ -21,7 +21,7 @@ module Queries
   class Roles < BaseQuery
     permission_required "roles:read"
 
-    type [Types::RoleType], null: false
+    type [ Types::RoleType ], null: false
 
     # @return [ActiveRecord::Relation<Role>]
     # @raise [ActionPolicy::Unauthorized] if +roles:read+ permission is missing

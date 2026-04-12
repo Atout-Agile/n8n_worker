@@ -15,4 +15,4 @@ FactoryBot.define do
       description { 'Utilisateur standard' }
     end
   end
-end 
+end

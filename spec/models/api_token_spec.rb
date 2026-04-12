@@ -14,7 +14,7 @@ RSpec.describe ApiToken, type: :model do
 
     describe 'uniqueness validation' do
       let!(:existing_token) { create(:api_token, user: user, name: 'Test Token') }
-      
+
       it 'validates uniqueness of name scoped to user' do
         duplicate_token = build(:api_token, user: user, name: 'Test Token')
         expect(duplicate_token).not_to be_valid
@@ -47,12 +47,12 @@ RSpec.describe ApiToken, type: :model do
     end
 
     it 'accepts a token with a valid subset of role permissions' do
-      token = build(:api_token, user: user, permissions: [role_perm])
+      token = build(:api_token, user: user, permissions: [ role_perm ])
       expect(token).to be_valid
     end
 
     it 'rejects a token with a permission not in the role' do
-      token = build(:api_token, user: user, permissions: [other_perm])
+      token = build(:api_token, user: user, permissions: [ other_perm ])
       expect(token).not_to be_valid
       expect(token.errors[:permissions]).to include(
         a_string_including('tokens:read')
@@ -60,7 +60,7 @@ RSpec.describe ApiToken, type: :model do
     end
 
     it 'rejects a token where only some permissions are invalid' do
-      token = build(:api_token, user: user, permissions: [role_perm, other_perm])
+      token = build(:api_token, user: user, permissions: [ role_perm, other_perm ])
       expect(token).not_to be_valid
     end
   end
@@ -70,7 +70,7 @@ RSpec.describe ApiToken, type: :model do
       it 'sets default expiration when not provided' do
         token = build(:api_token, expires_at: nil)
         token.valid? # Trigger callbacks
-        
+
         expected_expiration = 30.days.from_now
         expect(token.expires_at).to be_within(1.second).of(expected_expiration)
       end
@@ -79,7 +79,7 @@ RSpec.describe ApiToken, type: :model do
         custom_expiration = 7.days.from_now
         token = build(:api_token, expires_at: custom_expiration)
         token.valid? # Trigger callbacks
-        
+
         expect(token.expires_at).to be_within(1.second).of(custom_expiration)
       end
     end
@@ -95,7 +95,7 @@ RSpec.describe ApiToken, type: :model do
     describe '.active' do
       let!(:active_token) { create(:api_token, user: user, expires_at: 1.day.from_now) }
       let!(:expired_token) { create(:api_token, user: user, expires_at: 1.day.ago) }
-      
+
       it 'returns only non-expired tokens' do
         expect(described_class.active).to include(active_token)
         expect(described_class.active).not_to include(expired_token)
@@ -107,7 +107,7 @@ RSpec.describe ApiToken, type: :model do
     describe '.generate_for_user' do
       it 'creates a new token with raw token' do
         token = ApiToken.generate_for_user(user, 'Test Token')
-        
+
         expect(token).to be_persisted
         expect(token.name).to eq('Test Token')
         expect(token.user).to eq(user)
@@ -119,14 +119,14 @@ RSpec.describe ApiToken, type: :model do
 
       it 'accepts custom expiration days' do
         token = ApiToken.generate_for_user(user, 'Test Token', expires_in_days: 7)
-        
+
         expected_expiration = 7.days.from_now
         expect(token.expires_at).to be_within(1.minute).of(expected_expiration)
       end
 
       it 'returns invalid token object on validation error' do
         token = ApiToken.generate_for_user(user, '') # Invalid name
-        
+
         expect(token).not_to be_persisted
         expect(token.errors).not_to be_empty
       end
@@ -134,7 +134,7 @@ RSpec.describe ApiToken, type: :model do
       it 'generates unique token digests' do
         token1 = ApiToken.generate_for_user(user, 'Token 1')
         token2 = ApiToken.generate_for_user(user, 'Token 2')
-        
+
         expect(token1.token_digest).not_to eq(token2.token_digest)
         expect(token1.raw_token).not_to eq(token2.raw_token)
       end
@@ -193,10 +193,10 @@ RSpec.describe ApiToken, type: :model do
       it 'updates last_used_at timestamp' do
         # Vérifier que last_used_at était initialement nil
         expect(active_token.last_used_at).to be_nil
-        
+
         # Appeler la méthode
         active_token.touch_last_used!
-        
+
         # Vérifier que last_used_at a été mis à jour avec une valeur récente
         expect(active_token.reload.last_used_at).to be_within(1.second).of(Time.current)
       end

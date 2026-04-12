@@ -9,7 +9,7 @@ Capybara.default_driver = :cuprite
 Capybara.register_driver(:cuprite) do |app|
   Capybara::Cuprite::Driver.new(
     app,
-    window_size: [1200, 800],
+    window_size: [ 1200, 800 ],
     # Augmente les timeouts pour les environnements CI plus lents
     timeout: 10,
     process_timeout: 10,
@@ -33,4 +33,4 @@ end
 
 RSpec.configure do |config|
   config.include CupriteHelpers, type: :system
-end 
+end

@@ -8,4 +8,4 @@ FactoryBot.define do
     expires_at { 30.days.from_now }
     association :user
   end
-end 
+end

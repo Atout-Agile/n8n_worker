@@ -4,7 +4,7 @@ module GraphQLHelper
   def graphql_request(query:, variables: {}, current_user: nil)
     # Configurer l'en-tête pour GraphQL
     headers = { 'CONTENT_TYPE' => 'application/json' }
-    
+
     # Ajouter l'authentification si nécessaire
     if current_user
       token = JsonWebToken.encode(user_id: current_user.id)
@@ -22,4 +22,4 @@ RSpec.configure do |config|
   # Inclure le helper pour les tests GraphQL et request
   config.include GraphQLHelper, type: :request
   config.include GraphQLHelper, type: :graphql
-end 
+end

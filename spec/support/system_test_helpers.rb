@@ -14,4 +14,4 @@ RSpec.configure do |config|
     screenshot_name = "screenshot-#{time_now}.png"
     page.save_screenshot(Rails.root.join("tmp/screenshots/#{screenshot_name}"))
   end
-end 
+end
