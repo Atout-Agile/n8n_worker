@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_11_100250) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_11_100300) do
   create_table "api_token_permissions", force: :cascade do |t|
     t.integer "api_token_id", null: false
     t.integer "permission_id", null: false
@@ -75,6 +75,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_11_100250) do
   create_table "shared_notification_channels", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "name", default: "", null: false
+    t.string "channel_type", default: "", null: false
+    t.text "config_json", default: "{}", null: false
+    t.boolean "active", default: true, null: false
+    t.index ["name"], name: "index_shared_notification_channels_on_name", unique: true
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
@@ -225,6 +230,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_11_100250) do
   add_foreign_key "api_token_permissions", "api_tokens"
   add_foreign_key "api_token_permissions", "permissions"
   add_foreign_key "api_tokens", "users"
+  add_foreign_key "notification_channels", "shared_notification_channels"
   add_foreign_key "notification_channels", "users"
   add_foreign_key "role_permissions", "permissions"
   add_foreign_key "role_permissions", "roles"

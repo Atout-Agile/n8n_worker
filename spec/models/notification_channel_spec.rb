@@ -16,7 +16,7 @@ RSpec.describe NotificationChannel, type: :model do
       end
     end
 
-    it 'accepts shared', pending: 'awaiting Task 4' do
+    it 'accepts shared' do
       channel = build(:notification_channel, channel_type: 'shared', config: {})
       channel.shared_notification_channel = build(:shared_notification_channel)
       channel.consent_acknowledged_at = Time.current
@@ -46,7 +46,7 @@ RSpec.describe NotificationChannel, type: :model do
       expect(channel).not_to be_valid
     end
 
-    it 'requires consent_acknowledged_at for shared', pending: 'awaiting Task 4' do
+    it 'requires consent_acknowledged_at for shared' do
       shared = create(:shared_notification_channel)
       channel = build(:notification_channel,
                       channel_type: 'shared',
