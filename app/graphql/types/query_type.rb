@@ -37,5 +37,9 @@ module Types
 
     # @since 2026-04-11
     field :assistant_config, resolver: Queries::AssistantConfig
+
+    # @since 2026-04-11
+    field :assistant_events, resolver: Queries::AssistantEvents
+    field :assistant_reminders, resolver: Queries::AssistantReminders
   end
 end
