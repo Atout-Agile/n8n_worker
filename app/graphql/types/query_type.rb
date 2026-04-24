@@ -10,8 +10,8 @@ module Types
       context.schema.object_from_id(id, context)
     end
 
-    field :nodes, [Types::NodeType, null: true], null: true, description: "Fetches a list of objects given a list of IDs." do
-      argument :ids, [ID], required: true, description: "IDs of the objects."
+    field :nodes, [ Types::NodeType, null: true ], null: true, description: "Fetches a list of objects given a list of IDs." do
+      argument :ids, [ ID ], required: true, description: "IDs of the objects."
     end
 
     def nodes(ids:)
@@ -34,5 +34,18 @@ module Types
 
     # @since 2026-03-29
     field :permissions, resolver: Queries::Permissions
+
+    # @since 2026-04-11
+    field :assistant_config, resolver: Queries::AssistantConfig
+
+    # @since 2026-04-11
+    field :assistant_events, resolver: Queries::AssistantEvents
+    field :assistant_reminders, resolver: Queries::AssistantReminders
+
+    # @since 2026-04-11
+    field :shared_notification_channels, resolver: Queries::SharedNotificationChannels
+
+    # @since 2026-04-11
+    field :assistant_alerts, resolver: Queries::AssistantAlerts
   end
 end

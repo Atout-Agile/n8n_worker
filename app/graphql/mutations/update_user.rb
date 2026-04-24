@@ -39,7 +39,7 @@ module Mutations
 
     # @!attribute [r] errors
     #   @return [Array<String>] Validation errors
-    field :errors, [String], null: false
+    field :errors, [ String ], null: false
 
     # @param id [ID]
     # @param name [String, nil]
@@ -50,7 +50,7 @@ module Mutations
       authorize! current_user, to: :write?, with: UserPolicy
 
       user = ::User.find_by(id: id)
-      return { user: nil, errors: ['User not found'] } unless user
+      return { user: nil, errors: [ "User not found" ] } unless user
 
       attrs = { name: name, email: email }.compact
       if user.update(attrs)

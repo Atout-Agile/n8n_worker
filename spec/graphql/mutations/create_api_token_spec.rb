@@ -129,7 +129,7 @@ RSpec.describe Mutations::CreateApiToken, type: :request do
         token = JsonWebToken.encode(user_id: user.id)
         headers = { 'Authorization' => "Bearer #{token}", 'Content-Type' => 'application/json' }
         post '/graphql',
-          params: { query: query_with_perms, variables: { name: 'Scoped', permissionIds: [tokens_read_perm.id.to_s] } }.to_json,
+          params: { query: query_with_perms, variables: { name: 'Scoped', permissionIds: [ tokens_read_perm.id.to_s ] } }.to_json,
           headers: headers
 
         names = JSON.parse(response.body).dig('data', 'createApiToken', 'apiToken', 'permissions').map { |p| p['name'] }
@@ -140,7 +140,7 @@ RSpec.describe Mutations::CreateApiToken, type: :request do
         token = JsonWebToken.encode(user_id: user.id)
         headers = { 'Authorization' => "Bearer #{token}", 'Content-Type' => 'application/json' }
         post '/graphql',
-          params: { query: query_with_perms, variables: { name: 'Scoped', permissionIds: [users_read_perm.id.to_s] } }.to_json,
+          params: { query: query_with_perms, variables: { name: 'Scoped', permissionIds: [ users_read_perm.id.to_s ] } }.to_json,
           headers: headers
 
         perms = JSON.parse(response.body).dig('data', 'createApiToken', 'apiToken', 'permissions')

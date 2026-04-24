@@ -62,7 +62,7 @@ class GraphqlController < ApplicationController
     logger.error e.message
     logger.error e.backtrace.join("\n")
 
-    render json: { errors: [{ message: e.message, backtrace: e.backtrace }], data: {} }, status: 500
+    render json: { errors: [ { message: e.message, backtrace: e.backtrace } ], data: {} }, status: 500
   end
 
   # Returns true when the request carries an Authorization header.
@@ -71,7 +71,7 @@ class GraphqlController < ApplicationController
   # @return [Boolean]
   # @api private
   def api_request?
-    request.headers['Authorization'].present?
+    request.headers["Authorization"].present?
   end
 
   # Resolves the authenticated user and API token from the Authorization header.
@@ -81,10 +81,10 @@ class GraphqlController < ApplicationController
   # @note Accepts "Authorization: Bearer <token>" header
   # @note :token is only set when authentication was via API token (not JWT)
   def authenticate_from_header
-    auth_header = request.headers['Authorization']
-    return { user: nil, token: nil } unless auth_header&.start_with?('Bearer ')
+    auth_header = request.headers["Authorization"]
+    return { user: nil, token: nil } unless auth_header&.start_with?("Bearer ")
 
-    raw_token = auth_header.split(' ', 2)[1]
+    raw_token = auth_header.split(" ", 2)[1]
     return { user: nil, token: nil } if raw_token.blank?
 
     # Try API token first (raw hex stored as SHA256 digest)

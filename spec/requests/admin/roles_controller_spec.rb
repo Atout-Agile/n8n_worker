@@ -130,7 +130,7 @@ RSpec.describe Admin::RolesController, type: :request do
       it 'assigns selected permissions to the role' do
         expect {
           patch admin_role_path(other_role),
-            params: { role: { permission_ids: [perm_users_read.id, perm_tokens_write.id] } }
+            params: { role: { permission_ids: [ perm_users_read.id, perm_tokens_write.id ] } }
         }.to change { other_role.reload.permissions.count }.from(0).to(2)
 
         expect(response).to redirect_to(admin_roles_path)
@@ -147,7 +147,7 @@ RSpec.describe Admin::RolesController, type: :request do
 
       it 'ignores deprecated permissions even if submitted' do
         patch admin_role_path(other_role),
-          params: { role: { permission_ids: [perm_deprecated.id] } }
+          params: { role: { permission_ids: [ perm_deprecated.id ] } }
 
         expect(other_role.reload.permissions).not_to include(perm_deprecated)
       end

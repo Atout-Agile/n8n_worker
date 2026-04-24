@@ -10,7 +10,7 @@ RSpec.describe ApplicationController, type: :request do
     context 'when user is not logged in' do
       it 'returns nil when no token in session' do
         get dashboard_path
-        
+
         expect(response).to redirect_to(login_path)
       end
     end
@@ -20,7 +20,7 @@ RSpec.describe ApplicationController, type: :request do
     context 'when user is not authenticated' do
       it 'redirects to login with alert message' do
         get dashboard_path
-        
+
         expect(response).to redirect_to(login_path)
         expect(flash[:alert]).to eq('Please log in to access this page.')
       end
@@ -37,6 +37,5 @@ RSpec.describe ApplicationController, type: :request do
         expect(result[:user_id]).to eq(user.id)
       end
     end
-
   end
-end 
+end

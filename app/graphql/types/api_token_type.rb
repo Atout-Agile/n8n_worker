@@ -45,34 +45,34 @@ module Types
   class ApiTokenType < Types::BaseObject
     # @return [ID] The unique identifier
     field :id, ID, null: false
-    
+
     # @return [String] The descriptive name
     field :name, String, null: false
-    
+
     # @return [String, nil] Raw token value — only populated immediately after creation, nil otherwise
     field :token, String, null: true, description: "Raw token value (only present in the creation response)"
 
     def token
       object.raw_token
     end
-    
+
     # @return [GraphQL::Types::ISO8601DateTime] Token expiration timestamp
     field :expires_at, GraphQL::Types::ISO8601DateTime, null: false
-    
+
     # @return [GraphQL::Types::ISO8601DateTime, nil] Last usage timestamp
     field :last_used_at, GraphQL::Types::ISO8601DateTime, null: true
-    
+
     # @return [GraphQL::Types::ISO8601DateTime] Creation timestamp
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
-    
+
     # @return [GraphQL::Types::ISO8601DateTime] Last update timestamp
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
-    
+
     # @return [Types::UserType] The token owner
     field :user, Types::UserType, null: false
 
     # @return [Array<Types::PermissionType>] Permissions granted to this token
-    field :permissions, [Types::PermissionType], null: false,
+    field :permissions, [ Types::PermissionType ], null: false,
           description: "Permissions granted to this token (subset of role permissions)"
 
     # @return [Boolean] Whether the token has not yet expired
@@ -85,4 +85,4 @@ module Types
       object.expires_at > Time.current
     end
   end
-end 
+end

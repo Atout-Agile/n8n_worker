@@ -4,7 +4,7 @@ class JsonWebToken
   class << self
     def encode(payload)
       # Ajouter l'expiration si elle n'est pas déjà définie
-      expiration = ENV.fetch('JWT_EXPIRATION', '24h')
+      expiration = ENV.fetch("JWT_EXPIRATION", "24h")
       payload[:exp] ||= expiration_from_string(expiration)
 
       ::JWT.encode(payload, secret_key)
@@ -20,7 +20,7 @@ class JsonWebToken
     private
 
     def secret_key
-      ENV.fetch('JWT_SECRET_KEY') do
+      ENV.fetch("JWT_SECRET_KEY") do
         Rails.application.credentials.secret_key_base
       end
     end

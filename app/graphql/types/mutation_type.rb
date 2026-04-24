@@ -9,10 +9,10 @@
 #       user { id name }
 #       errors
 #     }
-#     
+#
 #     createApiToken(name: "My Token", expiresInDays: 30) {
 #       apiToken { id name token }
-#       errors  
+#       errors
 #     }
 #   }
 #
@@ -52,5 +52,26 @@ module Types
     # Role permission update mutation
     # @since 2026-03-29
     field :update_role_permissions, mutation: Mutations::UpdateRolePermissions
+
+    # @since 2026-04-11
+    field :update_assistant_config, mutation: Mutations::UpdateAssistantConfig
+
+    # @since 2026-04-11
+    field :set_calendar_source, mutation: Mutations::SetCalendarSource
+
+    # @since 2026-04-11
+    field :upsert_notification_channel, mutation: Mutations::UpsertNotificationChannel
+    field :delete_notification_channel, mutation: Mutations::DeleteNotificationChannel
+
+    # @since 2026-04-11
+    field :purge_my_alerts, mutation: Mutations::PurgeMyAlerts
+
+    # @since 2026-04-11
+    field :acknowledge_shared_channel_consent, mutation: Mutations::AcknowledgeSharedChannelConsent
+    field :add_shared_channel_to_my_channels, mutation: Mutations::AddSharedChannelToMyChannels
+    field :remove_shared_channel_from_my_channels, mutation: Mutations::RemoveSharedChannelFromMyChannels
+    field :create_shared_notification_channel, mutation: Mutations::CreateSharedNotificationChannel
+    field :update_shared_notification_channel, mutation: Mutations::UpdateSharedNotificationChannel
+    field :delete_shared_notification_channel, mutation: Mutations::DeleteSharedNotificationChannel
   end
 end

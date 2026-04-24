@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.3.0] — 2026-04-12
+
+### Assistant subsystem (S1)
+
+First self-contained subsystem of the personal assistant project: calendar ingestion via ICS, reminder scheduling with a late-detection rule, multi-channel fan-out (internal, ntfy, email, webhook, plus admin-provided shared channels with informed consent), and a full GraphQL API for user and admin operations.
+
+**Data model (6 new tables)**
+- **`db/migrate/20260411100100_create_user_assistant_configs.rb`** — one per user, holds timezone, reminder intervals, and the calendar source URL
+- **`db/migrate/20260411100200_create_notification_channels.rb`** — user-owned channels (internal, ntfy, email, webhook, shared)
+- **`db/migrate/20260411100300_create_shared_notification_channels.rb`** — admin-managed shared channels referenced by personal `shared`-type channels with informed consent
+- **`db/migrate/20260411100400_create_calendar_events.rb`** — observed events with soft-delete via `disappeared_tick_count` + `deleted_at`
+- **`db/migrate/20260411100500_create_calendar_reminders.rb`** — scheduled reminders with state machine `pending → {emitted, invalidated, expired}` and frozen content snapshot
+- **`db/migrate/20260411100600_create_alert_emissions.rb`** — per-emission log with per-channel attempt results (internal channel A backing store)
+
+**Models** — `UserAssistantConfig`, `NotificationChannel`, `SharedNotificationChannel`, `CalendarEvent`, `CalendarReminder`, `AlertEmission`; `User` extended with assistant associations
+
+**Services (`Assistant::` namespace)** — `Settings`, `IcsFetcher`, `IcsParser`, `ParsedEvent`, `EventReconciler`, `ReminderPlanner`, `AlertContent`, `AlertEmitter`
+
+**Channel adapters (`Assistant::Channels::`)** — `BaseAdapter`, `InternalAdapter`, `NtfyAdapter`, `EmailAdapter` + `AssistantMailer`, `WebhookAdapter`, `Registry`
+
+**Solid Queue jobs** — `FireReminderJob`, `PerUserCalendarSyncJob`, `CalendarSyncSchedulerJob`; `config/recurring.yml` wires scheduler every 2 minutes
+
+**Policies** — 6 new Action Policy policies matching permissions `assistant_config:*`, `assistant_alerts:*`, `assistant_shared_channels:*`
+
+**GraphQL — new types** — 6 new types: `UserAssistantConfigType`, `NotificationChannelType`, `SharedNotificationChannelType`, `CalendarEventType`, `CalendarReminderType`, `AlertEmissionType`
+
+**GraphQL — new queries** — `assistantConfig`, `assistantEvents`, `assistantReminders`, `assistantAlerts`, `sharedNotificationChannels`
+
+**GraphQL — new mutations** — `updateAssistantConfig`, `setCalendarSource`, `upsertNotificationChannel`, `deleteNotificationChannel`, `acknowledgeSharedChannelConsent`, `addSharedChannelToMyChannels`, `removeSharedChannelFromMyChannels`, `purgeMyAlerts`, `createSharedNotificationChannel`, `updateSharedNotificationChannel`, `deleteSharedNotificationChannel`
+
+**Tests** — 431 examples, 0 failures, 96.16% coverage
+
+---
+
 ## [0.2.3] — 2026-04-12
 
 ### Documentation & project tracking

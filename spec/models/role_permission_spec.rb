@@ -17,12 +17,12 @@ RSpec.describe RolePermission, type: :model do
   describe 'Role#assign_permissions' do
     let!(:perm_a) { create(:permission, :users_read) }
     let!(:perm_b) { create(:permission, :tokens_read) }
-    let(:role)    { create(:role).tap { |r| r.permissions << [perm_a, perm_b] } }
+    let(:role)    { create(:role).tap { |r| r.permissions << [ perm_a, perm_b ] } }
     let(:user)    { create(:user, role: role) }
-    let!(:token)  { create(:api_token, user: user, permissions: [perm_a, perm_b]) }
+    let!(:token)  { create(:api_token, user: user, permissions: [ perm_a, perm_b ]) }
 
     it 'replaces the permission set and cascades removals to tokens' do
-      role.assign_permissions([perm_b.id])
+      role.assign_permissions([ perm_b.id ])
 
       expect(role.reload.permissions).to contain_exactly(perm_b)
       expect(token.reload.permissions).to contain_exactly(perm_b)
@@ -30,7 +30,7 @@ RSpec.describe RolePermission, type: :model do
 
     it 'adds new permissions without touching tokens' do
       perm_c = create(:permission, :users_write)
-      role.assign_permissions([perm_a.id, perm_b.id, perm_c.id])
+      role.assign_permissions([ perm_a.id, perm_b.id, perm_c.id ])
 
       expect(role.reload.permissions).to include(perm_c)
       # token keeps its existing permissions untouched
@@ -49,7 +49,7 @@ RSpec.describe RolePermission, type: :model do
     let!(:perm)  { create(:permission, :users_read) }
     let(:role)   { create(:role).tap { |r| r.permissions << perm } }
     let(:user)   { create(:user, role: role) }
-    let!(:token) { create(:api_token, user: user, permissions: [perm]) }
+    let!(:token) { create(:api_token, user: user, permissions: [ perm ]) }
 
     it 'removes the permission from tokens belonging to users of that role' do
       expect(token.permissions).to include(perm)
@@ -62,7 +62,7 @@ RSpec.describe RolePermission, type: :model do
     it 'does not affect tokens of users in other roles' do
       other_role  = create(:role).tap { |r| r.permissions << perm }
       other_user  = create(:user, role: other_role)
-      other_token = create(:api_token, user: other_user, permissions: [perm])
+      other_token = create(:api_token, user: other_user, permissions: [ perm ])
 
       role.permissions.delete(perm)
 

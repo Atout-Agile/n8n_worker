@@ -16,7 +16,7 @@ module Admin
   # @see Permission
   # @since 2026-03-28
   class RolesController < BaseController
-    before_action :set_role, only: [:edit, :update]
+    before_action :set_role, only: [ :edit, :update ]
 
     # Lists all roles with their current permission count.
     #

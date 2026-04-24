@@ -7,9 +7,9 @@ RSpec.describe Mutations::UpdateApiTokenPermissions do
   let!(:tokens_read)  { create(:permission, :tokens_read) }
   let!(:users_read)   { create(:permission, :users_read) }
 
-  let(:role) { create(:role).tap { |r| r.permissions << [tokens_write, tokens_read] } }
+  let(:role) { create(:role).tap { |r| r.permissions << [ tokens_write, tokens_read ] } }
   let(:user) { create(:user, role: role) }
-  let!(:api_token) { create(:api_token, user: user, permissions: [tokens_write]) }
+  let!(:api_token) { create(:api_token, user: user, permissions: [ tokens_write ]) }
 
   let(:mutation) do
     <<~GQL
@@ -32,7 +32,7 @@ RSpec.describe Mutations::UpdateApiTokenPermissions do
 
   context "with tokens:write permission" do
     it "updates the token permissions" do
-      result = run(token_id: api_token.id, permission_ids: [tokens_read.id])
+      result = run(token_id: api_token.id, permission_ids: [ tokens_read.id ])
       names = result.dig("data", "updateApiTokenPermissions", "apiToken", "permissions").map { |p| p["name"] }
       expect(names).to contain_exactly("tokens:read")
       expect(api_token.reload.permissions).to contain_exactly(tokens_read)
@@ -45,7 +45,7 @@ RSpec.describe Mutations::UpdateApiTokenPermissions do
     end
 
     it "ignores permission IDs outside the user's role" do
-      result = run(token_id: api_token.id, permission_ids: [users_read.id])
+      result = run(token_id: api_token.id, permission_ids: [ users_read.id ])
       expect(result.dig("data", "updateApiTokenPermissions", "errors")).to be_empty
       # users_read is not in the role → silently ignored → token ends up with no permissions
       expect(api_token.reload.permissions).to be_empty

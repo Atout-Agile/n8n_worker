@@ -9,7 +9,7 @@ module Mutations
     # Fields
     field :token, String, null: true
     field :user, Types::UserType, null: true
-    field :errors, [String], null: false
+    field :errors, [ String ], null: false
 
     def resolve(email:, password:)
       user = User.find_by(email: email)
@@ -25,7 +25,7 @@ module Mutations
         {
           token: nil,
           user: nil,
-          errors: ['Email ou mot de passe invalide']
+          errors: [ "Email ou mot de passe invalide" ]
         }
       end
     end

@@ -16,7 +16,7 @@ module Queries
   class ApiTokens < Queries::BaseQuery
     permission_required "tokens:read"
 
-    type [Types::ApiTokenType], null: false
+    type [ Types::ApiTokenType ], null: false
 
     # @return [Array<ApiToken>]
     # @raise [ActionPolicy::Unauthorized] if +tokens:read+ permission is missing

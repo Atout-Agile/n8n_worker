@@ -33,7 +33,7 @@ RSpec.describe Mutations::UpdateRolePermissions do
 
   context "with roles:write permission" do
     it "assigns the selected permissions to the role" do
-      result = run(role_id: target_role.id, permission_ids: [users_read.id, tokens_read.id])
+      result = run(role_id: target_role.id, permission_ids: [ users_read.id, tokens_read.id ])
       names = result.dig("data", "updateRolePermissions", "role", "permissions").map { |p| p["name"] }
       expect(names).to contain_exactly("users:read", "tokens:read")
       expect(target_role.reload.permissions).to contain_exactly(users_read, tokens_read)
@@ -47,7 +47,7 @@ RSpec.describe Mutations::UpdateRolePermissions do
     end
 
     it "ignores deprecated permission IDs" do
-      result = run(role_id: target_role.id, permission_ids: [deprecated.id])
+      result = run(role_id: target_role.id, permission_ids: [ deprecated.id ])
       expect(result.dig("data", "updateRolePermissions", "errors")).to be_empty
       expect(target_role.reload.permissions).to be_empty
     end
