@@ -193,6 +193,22 @@ Protected operations require a permission. The table below lists all operations 
 | `roles` | query | `roles:read` |
 | `permissions` | query | `roles:read` |
 | `updateRolePermissions(roleId, permissionIds)` | mutation | `roles:write` |
+| `assistantConfig` | query | `assistant_config:read` |
+| `assistantEvents` | query | `assistant_config:read` |
+| `assistantReminders` | query | `assistant_config:read` |
+| `assistantAlerts` | query | `assistant_alerts:read` |
+| `sharedNotificationChannels` | query | `assistant_shared_channels:read` |
+| `updateAssistantConfig(...)` | mutation | `assistant_config:write` |
+| `setCalendarSource(url)` | mutation | `assistant_config:write` |
+| `upsertNotificationChannel(...)` | mutation | `assistant_config:write` |
+| `deleteNotificationChannel(id)` | mutation | `assistant_config:write` |
+| `acknowledgeSharedChannelConsent(id)` | mutation | `assistant_config:write` |
+| `addSharedChannelToMyChannels(sharedChannelId)` | mutation | `assistant_config:write` |
+| `removeSharedChannelFromMyChannels(id)` | mutation | `assistant_config:write` |
+| `purgeMyAlerts` | mutation | `assistant_alerts:write` |
+| `createSharedNotificationChannel(...)` | mutation | `assistant_shared_channels:write` |
+| `updateSharedNotificationChannel(...)` | mutation | `assistant_shared_channels:write` |
+| `deleteSharedNotificationChannel(id)` | mutation | `assistant_shared_channels:write` |
 
 When a request is denied the API returns:
 ```json
@@ -237,6 +253,57 @@ curl -X POST http://localhost:3000/graphql \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"query":"query { verifyToken(token: \"<raw_token>\") { id name } }"}'
+```
+
+## Assistant subsystem (S1)
+
+The assistant subsystem monitors an ICS calendar, schedules reminders, and fans them out across multiple channels.
+
+### How it works
+
+1. `CalendarSyncSchedulerJob` runs periodically and enqueues a `PerUserCalendarSyncJob` for each user who has a calendar source configured.
+2. `PerUserCalendarSyncJob` fetches the ICS feed, reconciles events against the database, and creates or invalidates `CalendarReminder` records via `ReminderPlanner`.
+3. `FireReminderJob` fires at each reminder's scheduled time and delegates to `AlertEmitter`, which fans out to all of the user's enabled channels (internal, ntfy, email, webhook, shared) with a configurable grace window for retries after an event starts.
+
+### Channel types
+
+| Channel | Description |
+|---|---|
+| `internal` | Stored in the database as `AlertEmission` records, readable via `assistantAlerts` |
+| `ntfy` | Push notification to a self-hosted or public ntfy server |
+| `email` | Email via `AssistantMailer` |
+| `webhook` | HTTP POST to an arbitrary URL |
+| `shared` | Admin-managed shared channel; user must give explicit consent before receiving alerts |
+
+### Permissions
+
+| Permission | Grants |
+|---|---|
+| `assistant_config:read` | Read own assistant config, events, reminders |
+| `assistant_config:write` | Update config, calendar source, own notification channels, shared channel consent |
+| `assistant_alerts:read` | Read own alert history |
+| `assistant_alerts:write` | Purge own alert history |
+| `assistant_shared_channels:read` | List admin-managed shared channels |
+| `assistant_shared_channels:write` | Admin CRUD on shared channels |
+
+Both default roles (`user` and `admin`) receive `assistant_config:read/write` and `assistant_alerts:read/write` and `assistant_shared_channels:read` via seeds. Only `admin` gets `assistant_shared_channels:write`.
+
+### Example — configure a calendar source
+
+```bash
+curl -X POST http://localhost:3000/graphql \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"mutation { setCalendarSource(url: \"https://example.com/calendar.ics\") { userAssistantConfig { calendarSourceUrl } errors } }"}'
+```
+
+### Example — list upcoming reminders
+
+```bash
+curl -X POST http://localhost:3000/graphql \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"query { assistantReminders { id scheduledAt status calendarEvent { title } } }"}'
 ```
 
 ## Déploiement
