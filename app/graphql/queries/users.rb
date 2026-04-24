@@ -16,7 +16,7 @@ module Queries
   class Users < Queries::BaseQuery
     permission_required "users:read"
 
-    type [Types::UserType], null: false
+    type [ Types::UserType ], null: false
 
     # @return [Array<User>]
     # @raise [ActionPolicy::Unauthorized] if +users:read+ permission is missing

@@ -29,7 +29,7 @@ module Mutations
 
     # @!attribute [r] permission_ids
     #   @return [Array<ID>] New permission IDs to assign
-    argument :permission_ids, [ID], required: true,
+    argument :permission_ids, [ ID ], required: true,
              description: "IDs of non-deprecated permissions to assign to the role"
 
     # @!attribute [r] role
@@ -38,7 +38,7 @@ module Mutations
 
     # @!attribute [r] errors
     #   @return [Array<String>] Validation errors
-    field :errors, [String], null: false
+    field :errors, [ String ], null: false
 
     # @param role_id [ID]
     # @param permission_ids [Array<ID>]
@@ -48,7 +48,7 @@ module Mutations
       authorize! current_user, to: :write?, with: RolePolicy
 
       role = ::Role.find_by(id: role_id)
-      return { role: nil, errors: ["Role not found"] } unless role
+      return { role: nil, errors: [ "Role not found" ] } unless role
 
       active_ids = Permission.where(id: permission_ids, deprecated: false).pluck(:id)
       role.assign_permissions(active_ids)

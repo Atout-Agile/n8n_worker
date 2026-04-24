@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe "Api::V1::Tokens", type: :request do
   let(:role) { create(:role) }
   let(:user) { create(:user, role: role) }
-  
+
   # Authenticates via the real session flow so current_user runs with its includes.
   def login_as(user)
     post sessions_path, params: { email: user.email, password: 'password123' }
@@ -133,7 +133,7 @@ RSpec.describe "Api::V1::Tokens", type: :request do
       it "generates a correct token digest" do
         login_as(user)
         post "/api/v1/tokens", params: valid_params
-        
+
         token = ApiToken.last
         expect(token.token_digest).to be_present
         expect(token.token_digest.length).to eq(64) # SHA256 hex digest length
@@ -142,7 +142,7 @@ RSpec.describe "Api::V1::Tokens", type: :request do
       it "sets a default expiration to 30 days" do
         login_as(user)
         post "/api/v1/tokens", params: valid_params
-        
+
         token = ApiToken.last
         expected_expiration = 30.days.from_now
         expect(token.expires_at).to be_within(1.minute).of(expected_expiration)
@@ -152,7 +152,7 @@ RSpec.describe "Api::V1::Tokens", type: :request do
         login_as(user)
         custom_expiration = 7.days.from_now
         post "/api/v1/tokens", params: valid_params.merge(expires_at: custom_expiration)
-        
+
         token = ApiToken.last
         expect(token.expires_at).to be_within(1.minute).of(custom_expiration)
       end
@@ -173,13 +173,13 @@ RSpec.describe "Api::V1::Tokens", type: :request do
       let!(:perm_read)  { create(:permission, :users_read) }
       let!(:perm_write) { create(:permission, :users_write) }
 
-      before { role.permissions << [perm_read, perm_write] }
+      before { role.permissions << [ perm_read, perm_write ] }
 
       it "creates a token with the selected permissions" do
         login_as(user)
         post "/api/v1/tokens", params: {
           name: "Scoped Token",
-          token: { permission_ids: [perm_read.id] }
+          token: { permission_ids: [ perm_read.id ] }
         }
         token = ApiToken.last
         expect(token.permissions).to contain_exactly(perm_read)
@@ -199,7 +199,7 @@ RSpec.describe "Api::V1::Tokens", type: :request do
         login_as(user)
         post "/api/v1/tokens", params: {
           name: "Injection Attempt",
-          token: { permission_ids: [other_perm.id] }
+          token: { permission_ids: [ other_perm.id ] }
         }
         expect(response).to redirect_to(api_v1_token_path(ApiToken.last))
         expect(ApiToken.last.permissions).to be_empty
@@ -324,9 +324,9 @@ RSpec.describe "Api::V1::Tokens", type: :request do
       # Test the controller logic directly by checking the query scope
       # When user tries to access other_token.id, it should not be found
       # because current_user.api_tokens.find(id) only looks in user's tokens
-      
+
       expect(user.api_tokens.find_by(id: other_token.id)).to be_nil
-      
+
       # This should raise ActiveRecord::RecordNotFound
       expect {
         user.api_tokens.find(other_token.id)

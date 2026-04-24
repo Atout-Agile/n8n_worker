@@ -13,4 +13,4 @@ module Types
       object.name
     end
   end
-end 
+end

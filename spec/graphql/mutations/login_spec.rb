@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 
@@ -27,10 +28,10 @@ RSpec.describe Mutations::Login, type: :request do
 
       it 'returns token and user info' do
         post '/graphql', params: { query: query, variables: variables }
-        
+
         json = JSON.parse(response.body)
         data = json['data']['login']
-        
+
         expect(data['token']).to be_present
         expect(data['user']['email']).to eq(user.email)
         expect(data['user']['username']).to eq(user.name)
@@ -43,10 +44,10 @@ RSpec.describe Mutations::Login, type: :request do
 
       it 'returns error message' do
         post '/graphql', params: { query: query, variables: variables }
-        
+
         json = JSON.parse(response.body)
         data = json['data']['login']
-        
+
         expect(data['token']).to be_nil
         expect(data['user']).to be_nil
         expect(data['errors']).to include('Email ou mot de passe invalide')
@@ -58,10 +59,10 @@ RSpec.describe Mutations::Login, type: :request do
 
       it 'returns error message' do
         post '/graphql', params: { query: query, variables: variables }
-        
+
         json = JSON.parse(response.body)
         data = json['data']['login']
-        
+
         expect(data['token']).to be_nil
         expect(data['user']).to be_nil
         expect(data['errors']).to include('Email ou mot de passe invalide')

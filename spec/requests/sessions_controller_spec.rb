@@ -10,7 +10,7 @@ RSpec.describe SessionsController, type: :request do
     context 'when user is not logged in' do
       it 'renders the login form' do
         get login_path
-        
+
         expect(response).to have_http_status(:success)
         expect(response.body).to include('Sign in')
         expect(response.body).to include('Email')
@@ -26,7 +26,7 @@ RSpec.describe SessionsController, type: :request do
 
       it 'redirects to dashboard' do
         get login_path
-        
+
         expect(response).to redirect_to(dashboard_path)
       end
     end
@@ -58,14 +58,14 @@ RSpec.describe SessionsController, type: :request do
 
       it 'logs in successfully and redirects to dashboard' do
         post sessions_path, params: valid_credentials
-        
+
         expect(response).to redirect_to(dashboard_path)
         expect(session[:jwt_token]).to eq('valid_jwt_token')
       end
 
       it 'sets @token for localStorage' do
         post sessions_path, params: valid_credentials
-        
+
         # Check that the token is stored in session (which is what matters)
         expect(session[:jwt_token]).to eq('valid_jwt_token')
       end
@@ -80,7 +80,7 @@ RSpec.describe SessionsController, type: :request do
               "login" => {
                 "token" => nil,
                 "user" => nil,
-                "errors" => ["Email ou mot de passe invalide"]
+                "errors" => [ "Email ou mot de passe invalide" ]
               }
             }
           })
@@ -89,7 +89,7 @@ RSpec.describe SessionsController, type: :request do
 
       it 'renders login form with error message' do
         post sessions_path, params: invalid_credentials
-        
+
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.body).to include('Email ou mot de passe invalide')
         expect(session[:jwt_token]).to be_nil
@@ -97,7 +97,7 @@ RSpec.describe SessionsController, type: :request do
 
       it 'sets flash alert with error message' do
         post sessions_path, params: invalid_credentials
-        
+
         expect(flash.now[:alert]).to eq('Email ou mot de passe invalide')
       end
     end
@@ -123,7 +123,7 @@ RSpec.describe SessionsController, type: :request do
 
       it 'handles GraphQL errors gracefully' do
         post sessions_path, params: valid_credentials
-        
+
         expect(response).to have_http_status(:unprocessable_entity)
         expect(flash.now[:alert]).to eq('GraphQL validation error')
       end
@@ -147,7 +147,7 @@ RSpec.describe SessionsController, type: :request do
 
       it 'shows default error message' do
         post sessions_path, params: valid_credentials
-        
+
         expect(response).to have_http_status(:unprocessable_entity)
         expect(flash.now[:alert]).to eq('Invalid email or password')
       end
@@ -171,7 +171,7 @@ RSpec.describe SessionsController, type: :request do
 
       it 'shows default error message' do
         post sessions_path, params: valid_credentials
-        
+
         expect(response).to have_http_status(:unprocessable_entity)
         expect(flash.now[:alert]).to eq('Invalid email or password')
       end
@@ -182,10 +182,10 @@ RSpec.describe SessionsController, type: :request do
     it 'clears the session and redirects to root' do
       # Set up a session with a token before the request
       post sessions_path, params: { email: user.email, password: 'password123' }
-      
+
       # Now test logout
       delete logout_path
-      
+
       expect(response).to redirect_to(root_path)
       expect(session[:jwt_token]).to be_nil
       expect(flash[:notice]).to eq('You have been logged out.')
@@ -194,12 +194,12 @@ RSpec.describe SessionsController, type: :request do
     it 'resets the entire session' do
       # Set up a session with a token before the request
       post sessions_path, params: { email: user.email, password: 'password123' }
-      
+
       # Add some other session data
       session[:other_data] = 'test'
-      
+
       delete logout_path
-      
+
       expect(session[:jwt_token]).to be_nil
       expect(session[:other_data]).to be_nil
     end
@@ -208,10 +208,10 @@ RSpec.describe SessionsController, type: :request do
   describe 'private methods' do
     it 'defines login_mutation correctly' do
       controller = SessionsController.new
-      
+
       # Use send to access private method
       mutation = controller.send(:login_mutation)
-      
+
       expect(mutation).to include('mutation Login')
       expect(mutation).to include('$email: String!')
       expect(mutation).to include('$password: String!')
@@ -220,4 +220,4 @@ RSpec.describe SessionsController, type: :request do
       expect(mutation).to include('errors')
     end
   end
-end 
+end

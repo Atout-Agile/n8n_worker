@@ -10,7 +10,7 @@ module Api
   module V1
     class TokensController < ApplicationController
       before_action :authenticate_user!
-      before_action :set_token, only: [:show, :revoke, :renew, :destroy]
+      before_action :set_token, only: [ :show, :revoke, :renew, :destroy ]
 
       # Lists all tokens for the current user.
       # Redirects to new token form if the user has no tokens yet.

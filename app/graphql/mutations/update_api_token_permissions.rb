@@ -29,7 +29,7 @@ module Mutations
 
     # @!attribute [r] permission_ids
     #   @return [Array<ID>] New permission IDs (must be a subset of the user's role permissions)
-    argument :permission_ids, [ID], required: true,
+    argument :permission_ids, [ ID ], required: true,
              description: "IDs of permissions to grant (must be a subset of your role's permissions)"
 
     # @!attribute [r] api_token
@@ -38,7 +38,7 @@ module Mutations
 
     # @!attribute [r] errors
     #   @return [Array<String>] Validation errors
-    field :errors, [String], null: false
+    field :errors, [ String ], null: false
 
     # @param id [ID]
     # @param permission_ids [Array<ID>]
@@ -48,7 +48,7 @@ module Mutations
       authorize! current_user, to: :write?, with: ApiTokenPolicy
 
       api_token = current_user.api_tokens.find_by(id: id)
-      return { api_token: nil, errors: ["Token not found"] } unless api_token
+      return { api_token: nil, errors: [ "Token not found" ] } unless api_token
 
       allowed_ids = current_user.assignable_permissions.map(&:id).to_set
       api_token.permission_ids = permission_ids.map(&:to_i).select { |pid| allowed_ids.include?(pid) }

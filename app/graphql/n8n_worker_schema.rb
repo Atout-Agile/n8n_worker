@@ -38,10 +38,16 @@ class N8nWorkerSchema < GraphQL::Schema
   # e.g. when using the Relay +node+ or +nodes+ queries.
   def self.resolve_type(abstract_type, obj, ctx)
     case obj
-    when User       then Types::UserType
-    when ApiToken   then Types::ApiTokenType
-    when Role       then Types::RoleType
-    when Permission then Types::PermissionType
+    when User                       then Types::UserType
+    when ApiToken                   then Types::ApiTokenType
+    when Role                       then Types::RoleType
+    when Permission                 then Types::PermissionType
+    when UserAssistantConfig        then Types::UserAssistantConfigType
+    when NotificationChannel        then Types::NotificationChannelType
+    when SharedNotificationChannel  then Types::SharedNotificationChannelType
+    when CalendarEvent              then Types::CalendarEventType
+    when CalendarReminder           then Types::CalendarReminderType
+    when AlertEmission              then Types::AlertEmissionType
     else
       raise GraphQL::RequiredImplementationMissingError, "No GraphQL type registered for #{obj.class.name}"
     end

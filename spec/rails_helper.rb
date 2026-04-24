@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 ENV['RAILS_ENV'] ||= 'test'
 
 # Charger les dépendances
@@ -13,11 +14,11 @@ require 'spec_helper'
 # Configuration SimpleCov
 SimpleCov.start do
   coverage_dir 'coverage'
-  
+
   enable_coverage :line
   primary_coverage :line
   refuse_coverage_drop
-  
+
   # Filtrer les fichiers de base
   add_filter do |source_file|
     source_file.filename.include?('app/channels') ||

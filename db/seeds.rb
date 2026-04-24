@@ -84,3 +84,32 @@ else
 end
 
 puts "Initial setup completed."
+
+# Grant S1 assistant permissions to default roles
+user_role = Role.find_by(name: 'user')
+admin_role = Role.find_by(name: 'admin')
+
+if user_role
+  user_perms = Permission.where(name: %w[
+    assistant_config:read
+    assistant_config:write
+    assistant_alerts:read
+    assistant_alerts:write
+    assistant_shared_channels:read
+  ])
+  user_role.permissions = (user_role.permissions + user_perms).uniq
+  user_role.save!
+end
+
+if admin_role
+  admin_perms = Permission.where(name: %w[
+    assistant_config:read
+    assistant_config:write
+    assistant_alerts:read
+    assistant_alerts:write
+    assistant_shared_channels:read
+    assistant_shared_channels:write
+  ])
+  admin_role.permissions = (admin_role.permissions + admin_perms).uniq
+  admin_role.save!
+end

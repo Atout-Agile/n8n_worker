@@ -18,7 +18,7 @@ RSpec.describe "GraphQL logging", type: :request do
     create(:api_token,
       user: user,
       token_digest: Digest::SHA256.hexdigest(raw_token),
-      permissions: [tokens_read_perm])
+      permissions: [ tokens_read_perm ])
   end
 
   let(:valid_query)  { "query GetTokens { apiTokens { id name } }" }
