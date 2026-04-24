@@ -102,4 +102,4 @@ gem "icalendar", "~> 2.10"
 # HTTP stubbing for channel adapter specs.
 gem "webmock", "~> 3.24", group: :test
 
-gem "graphql-docs", "~> 5.2"
+gem "graphql-docs", "~> 6.0"
